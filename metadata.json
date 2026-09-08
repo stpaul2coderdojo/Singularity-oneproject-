@@ -1,0 +1,6 @@
+{
+  "name": "Singularity-1",
+  "description": "Google Antigravity Agentic Platform for RLHF arXiv-quality publication synthesis and human rubric peer-review.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
