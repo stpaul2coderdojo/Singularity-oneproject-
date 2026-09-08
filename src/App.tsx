@@ -12,6 +12,7 @@ import { RubricReviewModal } from './components/RubricReviewModal';
 import { RLHFHistoryDrawer } from './components/RLHFHistoryDrawer';
 import { GitHubSyncDrawer } from './components/GitHubSyncDrawer';
 import { DocumentationModal } from './components/DocumentationModal';
+import { ResearchCopilotModal } from './components/ResearchCopilotModal';
 import { AgentPipelineTracker } from './components/AgentPipelineTracker';
 import { INITIAL_EXEMPLAR_PUBLICATION } from './data/domains';
 import { generateAcademicPdf } from './utils/pdfGenerator';
@@ -25,7 +26,8 @@ import {
   AlertCircle, 
   CheckCircle2, 
   ArrowRight,
-  ShieldAlert
+  ShieldAlert,
+  Bot
 } from 'lucide-react';
 
 export default function App() {
@@ -36,6 +38,7 @@ export default function App() {
   const [showRLHFHistory, setShowRLHFHistory] = useState(false);
   const [showGitHubSync, setShowGitHubSync] = useState(false);
   const [showDocsModal, setShowDocsModal] = useState(false);
+  const [showCopilotModal, setShowCopilotModal] = useState(false);
   const [gitHubConfig, setGitHubConfig] = useState<GitHubConfig | null>(null);
   const [isLoggingToGitHub, setIsLoggingToGitHub] = useState(false);
   const [gitHubCommitSha, setGitHubCommitSha] = useState<string | undefined>(undefined);

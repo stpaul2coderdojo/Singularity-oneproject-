@@ -23,9 +23,12 @@ interface DocumentationModalProps {
 }
 
 export const DocumentationModal: React.FC<DocumentationModalProps> = ({ isOpen, onClose }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'authorship' | 'rubric' | 'citation'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'authorship' | 'rubric' | 'wiki' | 'citation'>('overview');
   const [copiedBibtex, setCopiedBibtex] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [isSyncingWiki, setIsSyncingWiki] = useState(false);
+  const [wikiSyncSuccess, setWikiSyncSuccess] = useState<string | null>(null);
+  const [wikiSyncError, setWikiSyncError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -51,6 +54,28 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({ isOpen, 
     } else {
       setCopiedEmail(true);
       setTimeout(() => setCopiedEmail(false), 2500);
+    }
+  };
+
+  const handleSyncWiki = async () => {
+    setIsSyncingWiki(true);
+    setWikiSyncSuccess(null);
+    setWikiSyncError(null);
+    try {
+      const res = await fetch('/api/github/sync-wiki', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to sync wiki to GitHub');
+      }
+      setWikiSyncSuccess(`Synced ${data.entry?.files?.length || 6} wiki & SVG assets to ${data.entry?.repo || 'GitHub'} (Commit: ${data.entry?.commitSha?.slice(0, 7) || 'latest'})!`);
+    } catch (err: any) {
+      setWikiSyncError(err.message);
+    } finally {
+      setIsSyncingWiki(false);
     }
   };
 
@@ -87,10 +112,10 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({ isOpen, 
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-neutral-800 bg-neutral-950/80 px-4 pt-2 gap-2 text-xs font-medium">
+        <div className="flex border-b border-neutral-800 bg-neutral-950/80 px-4 pt-2 gap-2 text-xs font-medium overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-3 py-2 border-b-2 transition-colors flex items-center space-x-1.5 ${
+            className={`px-3 py-2 border-b-2 transition-colors flex items-center space-x-1.5 shrink-0 ${
               activeTab === 'overview'
                 ? 'border-amber-400 text-amber-300 font-semibold'
                 : 'border-transparent text-neutral-400 hover:text-neutral-200'
@@ -102,7 +127,7 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({ isOpen, 
 
           <button
             onClick={() => setActiveTab('authorship')}
-            className={`px-3 py-2 border-b-2 transition-colors flex items-center space-x-1.5 ${
+            className={`px-3 py-2 border-b-2 transition-colors flex items-center space-x-1.5 shrink-0 ${
               activeTab === 'authorship'
                 ? 'border-amber-400 text-amber-300 font-semibold'
                 : 'border-transparent text-neutral-400 hover:text-neutral-200'
@@ -114,7 +139,7 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({ isOpen, 
 
           <button
             onClick={() => setActiveTab('rubric')}
-            className={`px-3 py-2 border-b-2 transition-colors flex items-center space-x-1.5 ${
+            className={`px-3 py-2 border-b-2 transition-colors flex items-center space-x-1.5 shrink-0 ${
               activeTab === 'rubric'
                 ? 'border-amber-400 text-amber-300 font-semibold'
                 : 'border-transparent text-neutral-400 hover:text-neutral-200'
@@ -125,8 +150,20 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({ isOpen, 
           </button>
 
           <button
+            onClick={() => setActiveTab('wiki')}
+            className={`px-3 py-2 border-b-2 transition-colors flex items-center space-x-1.5 shrink-0 ${
+              activeTab === 'wiki'
+                ? 'border-amber-400 text-amber-300 font-semibold'
+                : 'border-transparent text-neutral-400 hover:text-neutral-200'
+            }`}
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span>Media-Rich Wiki & Visuals</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('citation')}
-            className={`px-3 py-2 border-b-2 transition-colors flex items-center space-x-1.5 ${
+            className={`px-3 py-2 border-b-2 transition-colors flex items-center space-x-1.5 shrink-0 ${
               activeTab === 'citation'
                 ? 'border-amber-400 text-amber-300 font-semibold'
                 : 'border-transparent text-neutral-400 hover:text-neutral-200'
@@ -407,7 +444,131 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({ isOpen, 
             </div>
           )}
 
-          {/* TAB 4: CITATION */}
+          {/* TAB 4: MEDIA-RICH WIKI & VISUAL ASSETS */}
+          {activeTab === 'wiki' && (
+            <div className="space-y-6">
+              {/* Wiki Header & Action Bar */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-neutral-950 border border-neutral-800">
+                <div>
+                  <h3 className="text-sm font-bold text-neutral-100 flex items-center space-x-2">
+                    <Globe className="w-4 h-4 text-amber-400" />
+                    <span>GitHub Media-Rich Wiki & Visual Diagrams</span>
+                  </h3>
+                  <p className="text-xs text-neutral-400 mt-0.5">
+                    High-resolution vector flowcharts, radar charts, and academic wiki documentation.
+                  </p>
+                </div>
+                <button
+                  onClick={handleSyncWiki}
+                  disabled={isSyncingWiki}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-semibold text-xs flex items-center space-x-2 transition-all shadow-md disabled:opacity-50 shrink-0"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>{isSyncingWiki ? 'Syncing Wiki to GitHub...' : 'Sync Wiki & Visuals to GitHub'}</span>
+                </button>
+              </div>
+
+              {/* Status Alert */}
+              {wikiSyncSuccess && (
+                <div className="p-3 bg-emerald-950/40 border border-emerald-500/40 rounded-xl text-xs text-emerald-300 flex items-center space-x-2 font-mono">
+                  <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{wikiSyncSuccess}</span>
+                </div>
+              )}
+              {wikiSyncError && (
+                <div className="p-3 bg-red-950/40 border border-red-500/40 rounded-xl text-xs text-red-300 flex items-center space-x-2 font-mono">
+                  <X className="w-4 h-4 text-red-400 shrink-0" />
+                  <span>{wikiSyncError}</span>
+                </div>
+              )}
+
+              {/* Diagram 1: Architecture Flowchart */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-400 flex items-center space-x-1.5">
+                    <span>Fig 1. Multi-Agent Synthesis Architecture Flowchart</span>
+                  </h4>
+                  <span className="text-[11px] font-mono text-neutral-500">public/assets/wiki/architecture_flowchart.svg</span>
+                </div>
+                <div className="rounded-xl border border-neutral-800 bg-neutral-950 overflow-hidden shadow-inner p-2">
+                  <img 
+                    src="/assets/wiki/architecture_flowchart.svg" 
+                    alt="Singularity-1 Multi-Agent System Architecture Flowchart"
+                    className="w-full h-auto rounded-lg"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+              </div>
+
+              {/* Diagram 2: arXiv Rubric Radar Chart */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-400 flex items-center space-x-1.5">
+                    <span>Fig 2. arXiv Review Rubric Dimensions Radar (v2.4)</span>
+                  </h4>
+                  <span className="text-[11px] font-mono text-neutral-500">public/assets/wiki/rubric_radar.svg</span>
+                </div>
+                <div className="rounded-xl border border-neutral-800 bg-neutral-950 overflow-hidden shadow-inner p-4 max-w-2xl mx-auto">
+                  <img 
+                    src="/assets/wiki/rubric_radar.svg" 
+                    alt="arXiv Review Rubric Radar Chart v2.4"
+                    className="w-full h-auto rounded-lg mx-auto"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+              </div>
+
+              {/* Media-Rich Wiki Articles Grid */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-400">
+                  Documented Wiki Articles in Repository (/wiki)
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="p-3.5 rounded-xl bg-neutral-950/80 border border-neutral-800 space-y-1 hover:border-neutral-700 transition-colors">
+                    <div className="flex items-center space-x-2 text-amber-300 font-semibold text-xs">
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>Home.md</span>
+                    </div>
+                    <p className="text-xs text-neutral-400 leading-normal">
+                      Overview, deployment links, PI credentials (IIT Madras Alumni), and navigation index.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-neutral-950/80 border border-neutral-800 space-y-1 hover:border-neutral-700 transition-colors">
+                    <div className="flex items-center space-x-2 text-amber-300 font-semibold text-xs">
+                      <Cpu className="w-3.5 h-3.5" />
+                      <span>System-Architecture.md</span>
+                    </div>
+                    <p className="text-xs text-neutral-400 leading-normal">
+                      Detailed decomposition of the three-phase Antigravity pipeline and LaTeX compilation.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-neutral-950/80 border border-neutral-800 space-y-1 hover:border-neutral-700 transition-colors">
+                    <div className="flex items-center space-x-2 text-amber-300 font-semibold text-xs">
+                      <Award className="w-3.5 h-3.5" />
+                      <span>RLHF-Rubric-v2.4.md</span>
+                    </div>
+                    <p className="text-xs text-neutral-400 leading-normal">
+                      6-dimensional conference review rubric and reward-guided policy iteration ($v_k \to v_{k+1}$).
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-neutral-950/80 border border-neutral-800 space-y-1 hover:border-neutral-700 transition-colors">
+                    <div className="flex items-center space-x-2 text-amber-300 font-semibold text-xs">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Gemini-Research-Copilot.md</span>
+                    </div>
+                    <p className="text-xs text-neutral-400 leading-normal">
+                      Real-time interactive research assistant grounded in preprint KaTeX mathematics and rebuttals.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: CITATION */}
           {activeTab === 'citation' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">

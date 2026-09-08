@@ -1,0 +1,197 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0c" />
+      <stop offset="100%" stop-color="#141419" />
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#c084fc" />
+      <stop offset="100%" stop-color="#9333ea" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="680" fill="url(#bgGrad)" />
+  <rect x="20" y="20" width="1160" height="640" rx="16" fill="none" stroke="#262626" stroke-width="1.5" />
+
+  <!-- Grid Accent Background -->
+  <g opacity="0.07" stroke="#ffffff" stroke-width="1">
+    <line x1="100" y1="40" x2="100" y2="640" />
+    <line x1="300" y1="40" x2="300" y2="640" />
+    <line x1="500" y1="40" x2="500" y2="640" />
+    <line x1="700" y1="40" x2="700" y2="640" />
+    <line x1="900" y1="40" x2="900" y2="640" />
+    <line x1="1100" y1="40" x2="1100" y2="640" />
+    <line x1="40" y1="120" x2="1160" y2="120" />
+    <line x1="40" y1="240" x2="1160" y2="240" />
+    <line x1="40" y1="360" x2="1160" y2="360" />
+    <line x1="40" y1="480" x2="1160" y2="480" />
+    <line x1="40" y1="600" x2="1160" y2="600" />
+  </g>
+
+  <!-- Header Section -->
+  <g transform="translate(60, 55)">
+    <rect x="0" y="0" width="36" height="36" rx="8" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1.5" />
+    <text x="18" y="24" fill="#f59e0b" font-family="system-ui, sans-serif" font-size="20" font-weight="bold" text-anchor="middle">🌌</text>
+    <text x="50" y="22" fill="#ffffff" font-family="'Cinzel', serif, system-ui" font-size="22" font-weight="bold" letter-spacing="2">SINGULARITY-1</text>
+    <text x="250" y="22" fill="#f59e0b" font-family="monospace" font-size="12" letter-spacing="1">[AGENTIC ARXIS ENGINE v2.4]</text>
+    <text x="50" y="42" fill="#a3a3a3" font-family="system-ui, sans-serif" font-size="12">Google Antigravity Multi-Agent Architecture • RLHF Rubric Optimization &amp; GitHub Provenance</text>
+    <text x="800" y="22" fill="#34d399" font-family="monospace" font-size="12">● PI: Bheemaiah (IIT Madras Alumni)</text>
+    <text x="800" y="42" fill="#737373" font-family="monospace" font-size="11">Cloud Hosted: Google Cloud Run (Singapore)</text>
+  </g>
+
+  <!-- Step 1: Input & Problem Formulation -->
+  <g transform="translate(60, 140)">
+    <rect width="320" height="180" rx="12" fill="#171717" stroke="#404040" stroke-width="1.5" />
+    <rect x="16" y="16" width="28" height="28" rx="6" fill="#38bdf8" fill-opacity="0.15" stroke="#38bdf8" stroke-width="1" />
+    <text x="30" y="35" fill="#38bdf8" font-family="monospace" font-size="14" font-weight="bold" text-anchor="middle">01</text>
+    <text x="56" y="34" fill="#38bdf8" font-family="monospace" font-size="13" font-weight="bold">PROBLEM FORMULATION</text>
+    <text x="56" y="50" fill="#737373" font-family="system-ui, sans-serif" font-size="11">Autonomous Literature Taxonomy Scan</text>
+
+    <path d="M 16 65 L 304 65" stroke="#262626" stroke-width="1" />
+
+    <text x="20" y="90" fill="#e5e5e5" font-family="system-ui, sans-serif" font-size="12" font-weight="600">• Literature Paradox Isolation</text>
+    <text x="20" y="112" fill="#a3a3a3" font-family="system-ui, sans-serif" font-size="11">Uncovers theoretical contradictions in prior work</text>
+    <text x="20" y="136" fill="#e5e5e5" font-family="system-ui, sans-serif" font-size="12" font-weight="600">• Formal Mathematical Objective</text>
+    <text x="20" y="158" fill="#f59e0b" font-family="monospace" font-size="11">min L(θ) s.t. convergence constraints</text>
+  </g>
+
+  <!-- Arrow 1 -> 2 -->
+  <path d="M 380 230 L 440 230" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 4" />
+  <polygon points="440,225 450,230 440,235" fill="#f59e0b" />
+
+  <!-- Step 2: Solution Architecture -->
+  <g transform="translate(450, 140)">
+    <rect width="320" height="180" rx="12" fill="#171717" stroke="#404040" stroke-width="1.5" />
+    <rect x="16" y="16" width="28" height="28" rx="6" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1" />
+    <text x="30" y="35" fill="#f59e0b" font-family="monospace" font-size="14" font-weight="bold" text-anchor="middle">02</text>
+    <text x="56" y="34" fill="#f59e0b" font-family="monospace" font-size="13" font-weight="bold">SOLUTION ARCHITECT</text>
+    <text x="56" y="50" fill="#737373" font-family="system-ui, sans-serif" font-size="11">Pareto Frontier &amp; Theorem Proving</text>
+
+    <path d="M 16 65 L 304 65" stroke="#262626" stroke-width="1" />
+
+    <text x="20" y="90" fill="#e5e5e5" font-family="system-ui, sans-serif" font-size="12" font-weight="600">• Algorithmic Paradigm &amp; Pseudocode</text>
+    <text x="20" y="112" fill="#a3a3a3" font-family="system-ui, sans-serif" font-size="11">Sub-quadratic computational complexity bounds</text>
+    <text x="20" y="136" fill="#e5e5e5" font-family="system-ui, sans-serif" font-size="12" font-weight="600">• Asymptotic Proofs &amp; Baselines</text>
+    <text x="20" y="158" fill="#38bdf8" font-family="monospace" font-size="11">Theorem 1: Convergence rate O(1/√T)</text>
+  </g>
+
+  <!-- Arrow 2 -> 3 -->
+  <path d="M 770 230 L 830 230" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 4" />
+  <polygon points="830,225 840,230 830,235" fill="#f59e0b" />
+
+  <!-- Step 3: Publication Composition -->
+  <g transform="translate(840, 140)">
+    <rect width="300" height="180" rx="12" fill="#171717" stroke="#404040" stroke-width="1.5" />
+    <rect x="16" y="16" width="28" height="28" rx="6" fill="#34d399" fill-opacity="0.15" stroke="#34d399" stroke-width="1" />
+    <text x="30" y="35" fill="#34d399" font-family="monospace" font-size="14" font-weight="bold" text-anchor="middle">03</text>
+    <text x="56" y="34" fill="#34d399" font-family="monospace" font-size="13" font-weight="bold">PUBLICATION COMPOSER</text>
+    <text x="56" y="50" fill="#737373" font-family="system-ui, sans-serif" font-size="11">IMRaD &amp; KaTeX LaTeX Engine</text>
+
+    <path d="M 16 65 L 284 65" stroke="#262626" stroke-width="1" />
+
+    <text x="20" y="90" fill="#e5e5e5" font-family="system-ui, sans-serif" font-size="12" font-weight="600">• Formal Preprint Sections (1 to 8)</text>
+    <text x="20" y="112" fill="#a3a3a3" font-family="system-ui, sans-serif" font-size="11">Abstract, Gap, Method, Ablation, BibTeX</text>
+    <text x="20" y="136" fill="#e5e5e5" font-family="system-ui, sans-serif" font-size="12" font-weight="600">• LaTeX Source &amp; KaTeX Equations</text>
+    <text x="20" y="158" fill="#34d399" font-family="monospace" font-size="11">Outputs paper.tex, paper.bib, PDF</text>
+  </g>
+
+  <!-- Connecting Downward Flow: 3 -> 4 (RLHF) -->
+  <path d="M 990 320 L 990 380 L 760 380" stroke="#c084fc" stroke-width="2" />
+  <polygon points="760,375 750,380 760,385" fill="#c084fc" />
+
+  <!-- Step 4: Human Review Rubric (RLHF Feedback Loop) -->
+  <g transform="translate(180, 360)">
+    <rect width="570" height="240" rx="14" fill="#171717" stroke="#c084fc" stroke-width="1.8" filter="url(#glow)" fill-opacity="0.9" />
+    <rect width="570" height="240" rx="14" fill="#171717" stroke="#c084fc" stroke-width="1.8" />
+    
+    <rect x="20" y="16" width="32" height="32" rx="8" fill="#c084fc" fill-opacity="0.15" stroke="#c084fc" stroke-width="1" />
+    <text x="36" y="38" fill="#c084fc" font-family="system-ui, sans-serif" font-size="18" text-anchor="middle">⚖️</text>
+    <text x="64" y="32" fill="#c084fc" font-family="monospace" font-size="14" font-weight="bold">HUMAN-IN-THE-LOOP RLHF RUBRIC ENGINE (v2.4)</text>
+    <text x="64" y="48" fill="#a3a3a3" font-family="system-ui, sans-serif" font-size="11">arXiv Peer-Review Dimensional Scoring &amp; Iterative Agentic Alignment</text>
+
+    <!-- 6 Dimensions Grid -->
+    <g transform="translate(20, 65)">
+      <!-- Dimension 1 & 2 -->
+      <rect x="0" y="0" width="255" height="36" rx="6" fill="#262626" />
+      <text x="12" y="22" fill="#ffffff" font-family="system-ui, sans-serif" font-size="11" font-weight="600">Novelty &amp; Originality</text>
+      <text x="215" y="22" fill="#f59e0b" font-family="monospace" font-size="11" font-weight="bold">25%</text>
+
+      <rect x="270" y="0" width="255" height="36" rx="6" fill="#262626" />
+      <text x="282" y="22" fill="#ffffff" font-family="system-ui, sans-serif" font-size="11" font-weight="600">Technical Rigor &amp; Proofs</text>
+      <text x="485" y="22" fill="#f59e0b" font-family="monospace" font-size="11" font-weight="bold">25%</text>
+
+      <!-- Dimension 3 & 4 -->
+      <rect x="0" y="44" width="255" height="36" rx="6" fill="#262626" />
+      <text x="12" y="66" fill="#ffffff" font-family="system-ui, sans-serif" font-size="11" font-weight="600">Empirical Significance</text>
+      <text x="215" y="66" fill="#f59e0b" font-family="monospace" font-size="11" font-weight="bold">20%</text>
+
+      <rect x="270" y="44" width="255" height="36" rx="6" fill="#262626" />
+      <text x="282" y="66" fill="#ffffff" font-family="system-ui, sans-serif" font-size="11" font-weight="600">Clarity &amp; Exposition</text>
+      <text x="485" y="66" fill="#f59e0b" font-family="monospace" font-size="11" font-weight="bold">15%</text>
+
+      <!-- Dimension 5 & 6 -->
+      <rect x="0" y="88" width="255" height="36" rx="6" fill="#262626" />
+      <text x="12" y="110" fill="#ffffff" font-family="system-ui, sans-serif" font-size="11" font-weight="600">Reproducibility &amp; Open Science</text>
+      <text x="215" y="110" fill="#f59e0b" font-family="monospace" font-size="11" font-weight="bold">10%</text>
+
+      <rect x="270" y="88" width="255" height="36" rx="6" fill="#262626" />
+      <text x="282" y="110" fill="#ffffff" font-family="system-ui, sans-serif" font-size="11" font-weight="600">Ethics &amp; Alignment Safety</text>
+      <text x="492" y="110" fill="#f59e0b" font-family="monospace" font-size="11" font-weight="bold">5%</text>
+    </g>
+
+    <!-- RLHF Equation Box -->
+    <rect x="20" y="196" width="525" height="32" rx="6" fill="#0a0a0a" stroke="#404040" stroke-width="1" />
+    <text x="282" y="217" fill="#c084fc" font-family="monospace" font-size="11" text-anchor="middle">Reward R = ∑ (wₖ · Scoreₖ) + λ · ActionableDirectives  ⟹  Version v(k+1)</text>
+  </g>
+
+  <!-- RLHF Loopback Arrow to Pipeline -->
+  <path d="M 180 480 L 120 480 L 120 280 L 160 280" stroke="#c084fc" stroke-width="2" stroke-dasharray="5 5" fill="none" />
+  <polygon points="155,275 165,280 155,285" fill="#c084fc" />
+  <text x="75" y="380" fill="#c084fc" font-family="monospace" font-size="11" transform="rotate(-90 75 380)" text-anchor="middle">Iterative Refinement Loop (v1 → v2)</text>
+
+  <!-- Step 5: Provenance & Output Layer -->
+  <g transform="translate(800, 360)">
+    <rect width="340" height="240" rx="14" fill="#171717" stroke="#34d399" stroke-width="1.5" />
+    <rect x="20" y="16" width="32" height="32" rx="8" fill="#34d399" fill-opacity="0.15" stroke="#34d399" stroke-width="1" />
+    <text x="36" y="38" fill="#34d399" font-family="system-ui, sans-serif" font-size="18" text-anchor="middle">📦</text>
+    <text x="64" y="32" fill="#34d399" font-family="monospace" font-size="13" font-weight="bold">EXPORT &amp; PROVENANCE</text>
+    <text x="64" y="48" fill="#737373" font-family="system-ui, sans-serif" font-size="11">Dual-Column PDF &amp; GitHub Sync</text>
+
+    <path d="M 20 65 L 320 65" stroke="#262626" stroke-width="1" />
+
+    <text x="24" y="90" fill="#ffffff" font-family="system-ui, sans-serif" font-size="12" font-weight="600">📑 Academic PDF Generator</text>
+    <text x="24" y="108" fill="#a3a3a3" font-family="system-ui, sans-serif" font-size="11">jsPDF + AutoTable formatted for arXiv</text>
+
+    <text x="24" y="136" fill="#ffffff" font-family="system-ui, sans-serif" font-size="12" font-weight="600">🔄 Automated GitHub Sync</text>
+    <text x="24" y="154" fill="#a3a3a3" font-family="system-ui, sans-serif" font-size="11">Direct commits of papers/ &amp; reviews/</text>
+
+    <text x="24" y="182" fill="#ffffff" font-family="system-ui, sans-serif" font-size="12" font-weight="600">💬 Context-Aware Gemini Copilot</text>
+    <text x="24" y="200" fill="#a3a3a3" font-family="system-ui, sans-serif" font-size="11">Mathematical Q&amp;A &amp; Reviewer rebuttal</text>
+  </g>
+
+  <!-- Arrow RLHF to Provenance -->
+  <path d="M 750 480 L 800 480" stroke="#34d399" stroke-width="2" />
+  <polygon points="795,475 805,480 795,485" fill="#34d399" />
+
+  <!-- Footer Credits -->
+  <text x="600" y="640" fill="#737373" font-family="monospace" font-size="11" text-anchor="middle">
+    Singularity-1 Open Science Initiative • St. Paul CoderDojo • Principal Investigator: Bheemaiah (bheemaiah@alumni.iitm.ac.in, IIT Madras Alumni)
+  </text>
+</svg>

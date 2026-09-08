@@ -440,6 +440,24 @@ export async function logPaperToGitHub(
         );
         files.push('AUTHORS.md');
       }
+
+      // Sync Wiki files & SVG visual diagrams
+      const wikiDir = path.join(process.cwd(), 'wiki');
+      if (fs.existsSync(wikiDir)) {
+        const wikiHome = path.join(wikiDir, 'Home.md');
+        if (fs.existsSync(wikiHome)) {
+          await putFileToGitHub(
+            owner,
+            repo,
+            'wiki/Home.md',
+            fs.readFileSync(wikiHome, 'utf-8'),
+            `[Wiki] Update Singularity-1 Wiki Home`,
+            targetBranch,
+            token
+          );
+          files.push('wiki/Home.md');
+        }
+      }
     } catch (docErr: any) {
       console.warn('Could not sync root documentation to GitHub:', docErr.message);
     }
@@ -576,6 +594,98 @@ export async function logReviewToGitHub(
       title,
       arxivId: publication.arxivId,
       version: publication.version,
+      timestamp: now,
+      commitSha: 'failed',
+      commitUrl: `https://github.com/${owner}/${repo}`,
+      files,
+      status: 'error',
+      error: err.message,
+      repo: `${owner}/${repo}`
+    };
+    gitHubLogHistory.unshift(entry);
+    throw err;
+  }
+}
+
+// 9. Sync Media-Rich Wiki & Visual SVG Assets to GitHub
+export async function syncWikiToGitHub(repoOverride?: string): Promise<GitHubLogEntry> {
+  const token = getEffectiveToken();
+  if (!token) {
+    throw new Error('No GitHub token configured. Authenticate with OAuth or add a Personal Access Token.');
+  }
+
+  const { owner, repo } = parseRepo(repoOverride || currentConfig.repo);
+  const targetBranch = currentConfig.branch || 'main';
+  const now = new Date().toISOString();
+  const files: string[] = [];
+
+  try {
+    const wikiDir = path.join(process.cwd(), 'wiki');
+    if (!fs.existsSync(wikiDir)) {
+      throw new Error('Wiki directory does not exist on disk.');
+    }
+
+    function getFilesRecursively(dir: string, baseDir: string = ''): string[] {
+      let results: string[] = [];
+      const list = fs.readdirSync(dir);
+      for (const file of list) {
+        const fullPath = path.join(dir, file);
+        const relPath = baseDir ? `${baseDir}/${file}` : file;
+        const stat = fs.statSync(fullPath);
+        if (stat && stat.isDirectory()) {
+          results = results.concat(getFilesRecursively(fullPath, relPath));
+        } else {
+          results.push(relPath);
+        }
+      }
+      return results;
+    }
+
+    const wikiFiles = getFilesRecursively(wikiDir);
+    let lastSha = '';
+    let lastUrl = `https://github.com/${owner}/${repo}/tree/${targetBranch}/wiki`;
+
+    for (const relPath of wikiFiles) {
+      const fullPath = path.join(wikiDir, relPath);
+      const content = fs.readFileSync(fullPath, 'utf-8');
+      const targetRepoPath = `wiki/${relPath}`;
+      const res = await putFileToGitHub(
+        owner,
+        repo,
+        targetRepoPath,
+        content,
+        `[Wiki & Media] Sync ${relPath} - Singularity-1 by Bheemaiah (IIT Madras Alumni)`,
+        targetBranch,
+        token
+      );
+      files.push(targetRepoPath);
+      lastSha = res.sha;
+      lastUrl = res.html_url;
+    }
+
+    const entry: GitHubLogEntry = {
+      id: 'log-wiki-' + Date.now(),
+      type: 'paper',
+      title: 'Media-Rich Wiki & Visual Diagrams Synchronization',
+      arxivId: 'WIKI-DOCS',
+      version: 1,
+      timestamp: now,
+      commitSha: lastSha || 'synced',
+      commitUrl: lastUrl,
+      files,
+      status: 'success',
+      repo: `${owner}/${repo}`
+    };
+    gitHubLogHistory.unshift(entry);
+    return entry;
+  } catch (err: any) {
+    console.error('Error syncing wiki to GitHub:', err);
+    const entry: GitHubLogEntry = {
+      id: 'log-wiki-' + Date.now(),
+      type: 'paper',
+      title: 'Media-Rich Wiki Synchronization',
+      arxivId: 'WIKI-DOCS',
+      version: 1,
       timestamp: now,
       commitSha: 'failed',
       commitUrl: `https://github.com/${owner}/${repo}`,

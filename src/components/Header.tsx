@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Scale, BookOpen, GitFork, Cpu, ShieldCheck, Download, Loader2, ExternalLink } from 'lucide-react';
+import { Sparkles, Scale, BookOpen, GitFork, Cpu, ShieldCheck, Download, Loader2, ExternalLink, Bot } from 'lucide-react';
 
 interface HeaderProps {
   onOpenRubric: () => void;
@@ -9,6 +9,7 @@ interface HeaderProps {
   isDownloadingPdf?: boolean;
   onOpenGitHubSync?: () => void;
   onOpenDocs?: () => void;
+  onOpenCopilot?: () => void;
   gitHubConnected?: boolean;
   gitHubRepo?: string;
   activeVersion?: number;
@@ -23,6 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
   isDownloadingPdf = false,
   onOpenGitHubSync,
   onOpenDocs,
+  onOpenCopilot,
   gitHubConnected = false,
   gitHubRepo = '',
   activeVersion = 1,
@@ -135,6 +137,18 @@ export const Header: React.FC<HeaderProps> = ({
                   ({gitHubRepo.split('/').pop()})
                 </span>
               )}
+            </button>
+          )}
+
+          {/* Context-Aware Gemini Copilot Trigger */}
+          {onOpenCopilot && (
+            <button
+              onClick={onOpenCopilot}
+              className="text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/15 via-purple-500/15 to-blue-500/15 hover:bg-neutral-800 text-amber-300 border border-amber-500/40 hover:border-amber-400 transition-all flex items-center space-x-1.5 shadow-sm"
+              title="Open Context-Aware Gemini Research Copilot"
+            >
+              <Bot className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+              <span className="hidden xs:inline sm:inline">AI Copilot</span>
             </button>
           )}
 
