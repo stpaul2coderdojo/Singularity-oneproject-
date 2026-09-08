@@ -20,7 +20,8 @@ import {
   Sparkles,
   Layers,
   Printer,
-  Loader2
+  Loader2,
+  FolderGit2
 } from 'lucide-react';
 
 interface PublicationViewProps {
@@ -28,13 +29,21 @@ interface PublicationViewProps {
   onOpenRubric: () => void;
   onOpenRLHFHistory: () => void;
   onOpenProblemAndSolution: () => void;
+  onOpenGitHubSync?: () => void;
+  onLogPaperToGitHub?: () => void;
+  isLoggingToGitHub?: boolean;
+  gitHubCommitSha?: string;
 }
 
 export const PublicationView: React.FC<PublicationViewProps> = ({
   publication,
   onOpenRubric,
   onOpenRLHFHistory,
-  onOpenProblemAndSolution
+  onOpenProblemAndSolution,
+  onOpenGitHubSync,
+  onLogPaperToGitHub,
+  isLoggingToGitHub = false,
+  gitHubCommitSha,
 }) => {
   const [activeTab, setActiveTab] = useState<'paper' | 'bibtex' | 'latex'>('paper');
   const [copiedBibtex, setCopiedBibtex] = useState(false);
@@ -187,6 +196,33 @@ export const PublicationView: React.FC<PublicationViewProps> = ({
             <Printer className="w-3.5 h-3.5" />
             <span>Print</span>
           </button>
+
+          {/* Log to GitHub Action */}
+          {onLogPaperToGitHub && (
+            <button
+              onClick={onLogPaperToGitHub}
+              disabled={isLoggingToGitHub}
+              className="text-xs font-medium px-3 py-1.5 rounded-lg border border-neutral-700 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 disabled:opacity-50 transition-all flex items-center space-x-1.5"
+              title="Log preprint, LaTeX, and BibTeX to GitHub"
+            >
+              {isLoggingToGitHub ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
+                  <span>Logging...</span>
+                </>
+              ) : gitHubCommitSha ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-emerald-300 font-mono">Logged ({gitHubCommitSha.substring(0, 7)})</span>
+                </>
+              ) : (
+                <>
+                  <FolderGit2 className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="hidden sm:inline">Log to GitHub</span>
+                </>
+              )}
+            </button>
+          )}
 
           {/* Primary Action: Launch Rubric Review */}
           <button

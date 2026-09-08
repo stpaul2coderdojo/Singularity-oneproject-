@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Scale, BookOpen, GitFork, Cpu, ShieldCheck, Download, Loader2 } from 'lucide-react';
+import { Sparkles, Scale, BookOpen, GitFork, Cpu, ShieldCheck, Download, Loader2, ExternalLink } from 'lucide-react';
 
 interface HeaderProps {
   onOpenRubric: () => void;
@@ -7,6 +7,10 @@ interface HeaderProps {
   onLoadExemplar: () => void;
   onDownloadPdf?: () => void;
   isDownloadingPdf?: boolean;
+  onOpenGitHubSync?: () => void;
+  onOpenDocs?: () => void;
+  gitHubConnected?: boolean;
+  gitHubRepo?: string;
   activeVersion?: number;
   totalRLHFIterations?: number;
 }
@@ -17,6 +21,10 @@ export const Header: React.FC<HeaderProps> = ({
   onLoadExemplar,
   onDownloadPdf,
   isDownloadingPdf = false,
+  onOpenGitHubSync,
+  onOpenDocs,
+  gitHubConnected = false,
+  gitHubRepo = '',
   activeVersion = 1,
   totalRLHFIterations = 0,
 }) => {
@@ -106,6 +114,42 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </button>
 
+          {/* GitHub Provenance & Audit Sync */}
+          {onOpenGitHubSync && (
+            <button
+              onClick={onOpenGitHubSync}
+              className="text-xs font-medium px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-800 hover:border-amber-500/40 transition-colors flex items-center space-x-1.5"
+              title="GitHub Provenance & Audit Log"
+            >
+              <div className="relative">
+                <GitFork className="w-3.5 h-3.5 text-amber-400" />
+                <div
+                  className={`absolute -top-1 -right-1 w-2 h-2 rounded-full ${
+                    gitHubConnected ? 'bg-emerald-400' : 'bg-amber-500'
+                  }`}
+                />
+              </div>
+              <span className="hidden sm:inline">GitHub</span>
+              {gitHubRepo && (
+                <span className="hidden xl:inline text-[10px] font-mono text-neutral-500">
+                  ({gitHubRepo.split('/').pop()})
+                </span>
+              )}
+            </button>
+          )}
+
+          {/* Documentation & Authorship Portal Trigger */}
+          {onOpenDocs && (
+            <button
+              onClick={onOpenDocs}
+              className="text-xs font-medium px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-800 hover:border-amber-500/40 transition-colors flex items-center space-x-1.5"
+              title="Documentation, Architecture & Authorship (Bheemaiah, IIT Madras Alumni)"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden md:inline">Docs & Authors</span>
+            </button>
+          )}
+
           {/* GitHub Source link */}
           <a
             href="https://github.com/stpaul2coderdojo/Singularity-1"
@@ -114,7 +158,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="text-neutral-400 hover:text-neutral-200 p-2 rounded-lg hover:bg-neutral-900 border border-transparent hover:border-neutral-800 transition-colors"
             title="View stpaul2coderdojo/Singularity-1 repository"
           >
-            <GitFork className="w-4 h-4" />
+            <ExternalLink className="w-4 h-4" />
           </a>
         </div>
       </div>

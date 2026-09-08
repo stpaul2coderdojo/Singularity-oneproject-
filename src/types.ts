@@ -153,3 +153,40 @@ export interface RLHFIterationRecord {
   agenticRefinementsSummary: string;
   timestamp: string;
 }
+
+export interface GitHubUser {
+  login: string;
+  avatar_url?: string;
+  name?: string;
+  html_url?: string;
+}
+
+export interface GitHubConfig {
+  connected: boolean;
+  authMethod?: 'oauth' | 'token' | 'env';
+  owner: string;
+  repo: string;
+  branch: string;
+  user?: GitHubUser | null;
+  autoLogPapers: boolean;
+  autoLogReviews: boolean;
+  isConfiguredInEnv: boolean;
+  hasOAuthApp: boolean;
+  authCallbackUrl?: string;
+}
+
+export interface GitHubLogEntry {
+  id: string;
+  type: 'paper' | 'review';
+  title: string;
+  arxivId: string;
+  version?: number;
+  timestamp: string;
+  commitSha: string;
+  commitUrl: string;
+  files: string[];
+  status: 'success' | 'error' | 'pending';
+  error?: string;
+  repo: string;
+}
+

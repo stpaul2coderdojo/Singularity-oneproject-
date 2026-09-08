@@ -19,7 +19,8 @@ import {
   MessageSquare,
   ShieldCheck,
   Zap,
-  Info
+  Info,
+  GitCommit
 } from 'lucide-react';
 
 interface RubricReviewModalProps {
@@ -402,9 +403,15 @@ export const RubricReviewModal: React.FC<RubricReviewModalProps> = ({
 
           {/* Bottom Action Footer */}
           <div className="pt-4 border-t border-neutral-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center space-x-2 text-xs text-neutral-400 font-mono">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span>Next Iteration Target: Version {publication.version + 1}</span>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs text-neutral-400 font-mono">
+              <div className="flex items-center space-x-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                <span>Next Iteration Target: Version {publication.version + 1}</span>
+              </div>
+              <div className="flex items-center space-x-1 text-neutral-500">
+                <GitCommit className="w-3.5 h-3.5 text-amber-400" />
+                <span>Auto-logs review to GitHub</span>
+              </div>
             </div>
 
             <div className="flex items-center space-x-3 w-full sm:w-auto">

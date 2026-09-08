@@ -3,17 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { DomainSelector } from './components/DomainSelector';
 import { ProblemAndSolutionView } from './components/ProblemAndSolutionView';
 import { PublicationView } from './components/PublicationView';
 import { RubricReviewModal } from './components/RubricReviewModal';
 import { RLHFHistoryDrawer } from './components/RLHFHistoryDrawer';
+import { GitHubSyncDrawer } from './components/GitHubSyncDrawer';
+import { DocumentationModal } from './components/DocumentationModal';
 import { AgentPipelineTracker } from './components/AgentPipelineTracker';
 import { INITIAL_EXEMPLAR_PUBLICATION } from './data/domains';
 import { generateAcademicPdf } from './utils/pdfGenerator';
-import { ArXivPublication, HumanReviewRubric, AgentStepTelemetry } from './types';
+import { ArXivPublication, HumanReviewRubric, AgentStepTelemetry, GitHubConfig } from './types';
 import { 
   Sparkles, 
   Layers, 
@@ -32,6 +34,11 @@ export default function App() {
   const [showDomainSelector, setShowDomainSelector] = useState(false);
   const [showRubricModal, setShowRubricModal] = useState(false);
   const [showRLHFHistory, setShowRLHFHistory] = useState(false);
+  const [showGitHubSync, setShowGitHubSync] = useState(false);
+  const [showDocsModal, setShowDocsModal] = useState(false);
+  const [gitHubConfig, setGitHubConfig] = useState<GitHubConfig | null>(null);
+  const [isLoggingToGitHub, setIsLoggingToGitHub] = useState(false);
+  const [gitHubCommitSha, setGitHubCommitSha] = useState<string | undefined>(undefined);
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRefining, setIsRefining] = useState(false);
@@ -43,11 +50,51 @@ export default function App() {
     INITIAL_EXEMPLAR_PUBLICATION.telemetry.steps
   );
 
+  const refreshGitHubStatus = async () => {
+    try {
+      const res = await fetch('/api/github/status');
+      if (res.ok) {
+        const data = await res.json();
+        setGitHubConfig(data);
+      }
+    } catch (e) {
+      console.warn('Could not load GitHub status:', e);
+    }
+  };
+
+  useEffect(() => {
+    refreshGitHubStatus();
+  }, []);
+
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     setNotification({ type, message });
     setTimeout(() => {
       setNotification(null);
     }, 4500);
+  };
+
+  const handleLogCurrentPaperToGitHub = async () => {
+    try {
+      setIsLoggingToGitHub(true);
+      const res = await fetch('/api/github/log-paper', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ publication })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to log paper to GitHub');
+      }
+      const sha = data.entry?.commitSha;
+      setGitHubCommitSha(sha);
+      showToast(`Paper successfully logged to GitHub (${sha ? sha.substring(0, 7) : 'committed'})!`, 'success');
+      refreshGitHubStatus();
+    } catch (err: any) {
+      console.error('GitHub log paper error:', err);
+      showToast(err.message || 'Failed to log paper to GitHub', 'error');
+    } finally {
+      setIsLoggingToGitHub(false);
+    }
   };
 
   const handleGlobalDownloadPdf = async () => {
@@ -305,6 +352,10 @@ export default function App() {
           onLoadExemplar={handleLoadExemplar}
           onDownloadPdf={handleGlobalDownloadPdf}
           isDownloadingPdf={isDownloadingPdf}
+          onOpenGitHubSync={() => setShowGitHubSync(true)}
+          onOpenDocs={() => setShowDocsModal(true)}
+          gitHubConnected={gitHubConfig?.connected}
+          gitHubRepo={gitHubConfig ? `${gitHubConfig.owner}/${gitHubConfig.repo}` : ''}
           activeVersion={publication.version}
           totalRLHFIterations={publication.rlhfHistory?.length || 0}
         />
@@ -407,9 +458,27 @@ export default function App() {
             onOpenRubric={() => setShowRubricModal(true)}
             onOpenRLHFHistory={() => setShowRLHFHistory(true)}
             onOpenProblemAndSolution={() => setActiveView('problem-solution')}
+            onOpenGitHubSync={() => setShowGitHubSync(true)}
+            onLogPaperToGitHub={handleLogCurrentPaperToGitHub}
+            isLoggingToGitHub={isLoggingToGitHub}
+            gitHubCommitSha={gitHubCommitSha}
           />
         )}
       </main>
+
+      {/* GitHub Provenance & Audit Sync Drawer */}
+      <GitHubSyncDrawer
+        isOpen={showGitHubSync}
+        onClose={() => setShowGitHubSync(false)}
+        currentPublication={publication}
+        onShowToast={showToast}
+      />
+
+      {/* Documentation, Architecture & Authorship Modal */}
+      <DocumentationModal
+        isOpen={showDocsModal}
+        onClose={() => setShowDocsModal(false)}
+      />
 
       {/* Domain Selection Modal (Triggered from header) */}
       {showDomainSelector && (
@@ -442,17 +511,44 @@ export default function App() {
       />
 
       {/* Footer */}
-      <footer className="border-t border-neutral-900 bg-neutral-950 py-6 mt-12 text-center text-xs text-neutral-500 font-mono space-y-2 no-print">
-        <div className="flex items-center justify-center space-x-3">
-          <span>Singularity-1 Platform</span>
+      <footer className="border-t border-neutral-900 bg-neutral-950 py-8 mt-12 text-center text-xs text-neutral-500 font-mono space-y-3 no-print">
+        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-neutral-400">
+          <span className="text-neutral-200 font-semibold">Singularity-1 Platform</span>
           <span>•</span>
           <span>Google Antigravity Agentic Architecture</span>
           <span>•</span>
           <span>RLHF arXiv Standards Rubric Engine</span>
+          <span>•</span>
+          <button
+            onClick={() => setShowDocsModal(true)}
+            className="text-amber-400 hover:text-amber-300 underline cursor-pointer"
+          >
+            Documentation & Authorship
+          </button>
         </div>
-        <p className="text-[11px] text-neutral-600">
-          Developed in reference to <a href="https://github.com/stpaul2coderdojo/Singularity-1" target="_blank" rel="noreferrer" className="underline hover:text-amber-400">stpaul2coderdojo/Singularity-1</a>
-        </p>
+        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] text-neutral-500">
+          <span>PI: <strong>Bheemaiah</strong> (<a href="mailto:bheemaiah@alumni.iitm.ac.in" className="hover:text-amber-400">bheemaiah@alumni.iitm.ac.in</a>)</span>
+          <span>•</span>
+          <span>IIT Madras Alumni</span>
+          <span>•</span>
+          <a
+            href="https://ais-pre-67bjrhkutnv3a34zametcr-219346993343.asia-southeast1.run.app"
+            target="_blank"
+            rel="noreferrer"
+            className="text-emerald-400 hover:text-emerald-300 underline"
+          >
+            Live Cloud Hosted App
+          </a>
+          <span>•</span>
+          <a
+            href="https://github.com/stpaul2coderdojo/Singularity-1"
+            target="_blank"
+            rel="noreferrer"
+            className="underline hover:text-amber-400"
+          >
+            stpaul2coderdojo/Singularity-1
+          </a>
+        </div>
       </footer>
     </div>
   );

@@ -1,6 +1,6 @@
 import React from 'react';
 import { RLHFIterationRecord } from '../types';
-import { History, X, ArrowRight, CheckCircle, Scale, Sparkles, UserCheck } from 'lucide-react';
+import { History, X, ArrowRight, CheckCircle, Scale, Sparkles, UserCheck, GitCommit } from 'lucide-react';
 
 interface RLHFHistoryDrawerProps {
   isOpen: boolean;
@@ -105,8 +105,14 @@ export const RLHFHistoryDrawer: React.FC<RLHFHistoryDrawerProps> = ({
                   </p>
                 </div>
 
-                <div className="text-[10px] font-mono text-neutral-500 text-right pt-1">
-                  {new Date(record.timestamp).toLocaleString()}
+                <div className="flex items-center justify-between text-[10px] font-mono text-neutral-500 pt-1 border-t border-neutral-900">
+                  <div className="flex items-center space-x-1 text-neutral-400">
+                    <GitCommit className="w-3 h-3 text-amber-400" />
+                    <span>Logged to GitHub</span>
+                  </div>
+                  <div>
+                    {new Date(record.timestamp).toLocaleString()}
+                  </div>
                 </div>
               </div>
             ))

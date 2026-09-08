@@ -4,6 +4,17 @@ import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
+import {
+  getGitHubConfig,
+  updateGitHubConfig,
+  getEffectiveToken,
+  fetchGitHubUser,
+  exchangeOAuthCode,
+  setActiveOAuthToken,
+  logPaperToGitHub,
+  logReviewToGitHub,
+  getLogHistory
+} from './server/github';
 
 dotenv.config();
 
@@ -44,6 +55,178 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// ==========================================
+// GITHUB INTEGRATION & OAUTH ENDPOINTS
+// ==========================================
+
+// 1. Get OAuth Authorization URL
+app.get('/api/auth/github/url', (req, res) => {
+  const appUrl = process.env.APP_URL || 'https://ais-dev-67bjrhkutnv3a34zametcr-219346993343.asia-southeast1.run.app';
+  const redirectUri = `${appUrl.replace(/\/$/, '')}/auth/callback`;
+  const clientId = process.env.GITHUB_CLIENT_ID;
+
+  if (!clientId) {
+    return res.status(400).json({
+      error: 'GITHUB_CLIENT_ID is not configured in environment variables. Please set it in AI Studio settings or use GITHUB_TOKEN.'
+    });
+  }
+
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    scope: 'repo read:user',
+    state: 'singularity_' + Date.now()
+  });
+
+  res.json({ url: `https://github.com/login/oauth/authorize?${params.toString()}` });
+});
+
+// 2. OAuth Callback Route (popup sends postMessage to opener and closes)
+app.get(['/auth/callback', '/auth/callback/'], async (req, res) => {
+  try {
+    const { code } = req.query;
+    const appUrl = process.env.APP_URL || 'https://ais-dev-67bjrhkutnv3a34zametcr-219346993343.asia-southeast1.run.app';
+    const redirectUri = `${appUrl.replace(/\/$/, '')}/auth/callback`;
+
+    if (typeof code === 'string' && code) {
+      const token = await exchangeOAuthCode(code, redirectUri);
+      setActiveOAuthToken(token);
+    }
+
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>GitHub Connected — Singularity-1</title>
+          <style>
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              height: 100vh;
+              margin: 0;
+              background: #0a0a0a;
+              color: #f5f5f5;
+              text-align: center;
+              padding: 20px;
+            }
+            .card {
+              background: #171717;
+              border: 1px solid #262626;
+              border-radius: 12px;
+              padding: 28px 32px;
+              max-width: 400px;
+            }
+            .title { color: #f59e0b; font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+            .desc { color: #a3a3a3; font-size: 13px; line-height: 1.5; margin-bottom: 16px; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="title">GitHub Authentication Complete</div>
+            <div class="desc">Your account has been connected to Singularity-1. Preprints and reviews can now be logged. This window will close automatically.</div>
+          </div>
+          <script>
+            if (window.opener) {
+              window.opener.postMessage({ type: 'OAUTH_AUTH_SUCCESS', provider: 'github' }, '*');
+              setTimeout(() => window.close(), 600);
+            } else {
+              window.location.href = '/';
+            }
+          </script>
+        </body>
+      </html>
+    `);
+  } catch (err: any) {
+    console.error('OAuth Callback Error:', err);
+    res.status(500).send(`
+      <!DOCTYPE html>
+      <html>
+        <head><title>GitHub Authentication Error</title></head>
+        <body style="font-family: sans-serif; padding: 30px; background: #0a0a0a; color: #ef4444;">
+          <h2>Authentication Failed</h2>
+          <p>${err.message || 'Unknown error during OAuth callback'}</p>
+          <button onclick="window.close()" style="padding: 8px 16px; background: #262626; color: #fff; border: 1px solid #404040; border-radius: 6px; cursor: pointer;">Close Window</button>
+        </body>
+      </html>
+    `);
+  }
+});
+
+// 3. GitHub Connection Status & Current Target Config
+app.get('/api/github/status', async (req, res) => {
+  try {
+    const config = getGitHubConfig();
+    const token = getEffectiveToken();
+    let user = null;
+    if (token) {
+      user = await fetchGitHubUser(token);
+    }
+    res.json({ ...config, user });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 4. Update Target Repository & Auto-Log Settings
+app.post('/api/github/config', async (req, res) => {
+  try {
+    const { owner, repo, branch, autoLogPapers, autoLogReviews } = req.body;
+    updateGitHubConfig({ owner, repo, branch, autoLogPapers, autoLogReviews });
+    const config = getGitHubConfig();
+    const token = getEffectiveToken();
+    let user = null;
+    if (token) {
+      user = await fetchGitHubUser(token);
+    }
+    res.json({ success: true, config: { ...config, user } });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 5. Disconnect Active GitHub OAuth Session
+app.post('/api/github/disconnect', (req, res) => {
+  setActiveOAuthToken(null);
+  res.json({ success: true, config: getGitHubConfig() });
+});
+
+// 6. Retrieve History of Logged Preprints & Reviews
+app.get('/api/github/logs', (req, res) => {
+  res.json({ success: true, logs: getLogHistory() });
+});
+
+// 7. Explicitly Log a Paper to GitHub
+app.post('/api/github/log-paper', async (req, res) => {
+  try {
+    const { publication, repoOverride } = req.body;
+    if (!publication) {
+      return res.status(400).json({ error: 'Publication is required' });
+    }
+    const entry = await logPaperToGitHub(publication, repoOverride);
+    res.json({ success: true, entry });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 8. Explicitly Log a Human Rubric Review to GitHub
+app.post('/api/github/log-review', async (req, res) => {
+  try {
+    const { publication, reviewRubric, repoOverride } = req.body;
+    if (!publication || !reviewRubric) {
+      return res.status(400).json({ error: 'Publication and reviewRubric are required' });
+    }
+    const entry = await logReviewToGitHub(publication, reviewRubric, repoOverride);
+    res.json({ success: true, entry });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 
 // Endpoint: Agentic Problem Statement Formulation
 app.post('/api/generate/problem-statement', async (req, res) => {
@@ -398,7 +581,7 @@ ${allReferences.map(r => `\\bibitem{${r.key}} ${r.authors}, \\emph{${r.title}}, 
             id: 'step-1',
             agentName: 'Problem Formulation Agent',
             agentRole: 'Taxonomy scan & literature gap isolation',
-            status: 'completed',
+            status: 'completed' as const,
             summary: `Synthesized formal problem statement for ${domainName}: "${problem.title}"`,
             durationMs: Math.round(elapsed * 0.28)
           },
@@ -406,7 +589,7 @@ ${allReferences.map(r => `\\bibitem{${r.key}} ${r.authors}, \\emph{${r.title}}, 
             id: 'step-2',
             agentName: 'Solution Architect Agent',
             agentRole: 'Algorithmic derivation & theorem proof',
-            status: 'completed',
+            status: 'completed' as const,
             summary: `Formulated architectural paradigm: "${solution.paradigmName}" with asymptotic complexity ${solution.computationalComplexity}`,
             durationMs: Math.round(elapsed * 0.38)
           },
@@ -414,7 +597,7 @@ ${allReferences.map(r => `\\bibitem{${r.key}} ${r.authors}, \\emph{${r.title}}, 
             id: 'step-3',
             agentName: 'Publication Composer Agent',
             agentRole: 'Preprint structuring & LaTeX typesetting',
-            status: 'completed',
+            status: 'completed' as const,
             summary: `Assembled ${pubSections.length} arXiv sections with abstract and scholarly citations.`,
             durationMs: Math.round(elapsed * 0.34)
           }
@@ -423,6 +606,12 @@ ${allReferences.map(r => `\\bibitem{${r.key}} ${r.authors}, \\emph{${r.title}}, 
       },
       rlhfHistory: []
     };
+
+    // Auto-log paper to GitHub if enabled
+    const ghConfig = getGitHubConfig();
+    if (ghConfig.autoLogPapers) {
+      logPaperToGitHub(publication).catch(e => console.warn('Background GitHub auto-log paper failed:', e.message));
+    }
 
     return res.json({
       success: true,
@@ -524,6 +713,15 @@ Return valid JSON:
       comments: `${publication.comments} | v${newVersion}: Revised based on Human Rubric RLHF feedback (Composite Score: ${reviewRubric.weightedScore}/5.00)`,
       rlhfHistory: [...(publication.rlhfHistory || []), rlhfIteration]
     };
+
+    // Auto-log review and revised paper to GitHub if enabled
+    const ghConfig = getGitHubConfig();
+    if (ghConfig.autoLogReviews) {
+      logReviewToGitHub(updatedPublication, reviewRubric).catch(e => console.warn('Background GitHub review auto-log failed:', e.message));
+    }
+    if (ghConfig.autoLogPapers) {
+      logPaperToGitHub(updatedPublication).catch(e => console.warn('Background GitHub paper auto-log failed:', e.message));
+    }
 
     return res.json({
       success: true,
