@@ -1,4 +1,5 @@
 import { ResearchDomain, HumanReviewRubric, ArXivPublication } from '../types';
+import { evaluatePublicationBenchmarks } from '../utils/benchmarkEvaluator';
 
 export const RESEARCH_DOMAINS: ResearchDomain[] = [
   {
@@ -579,3 +580,7 @@ Reinforcement Learning from Human Feedback (RLHF) often collapses multi-dimensio
   },
   rlhfHistory: []
 };
+
+// Bind full academic benchmark evaluation to initial exemplar preprint
+INITIAL_EXEMPLAR_PUBLICATION.benchmarkEvaluation = evaluatePublicationBenchmarks(INITIAL_EXEMPLAR_PUBLICATION);
+

@@ -614,8 +614,14 @@ export async function syncWikiToGitHub(repoOverride?: string): Promise<GitHubLog
     throw new Error('No GitHub token configured. Authenticate with OAuth or add a Personal Access Token.');
   }
 
-  const { owner, repo } = parseRepo(repoOverride || currentConfig.repo);
-  const targetBranch = currentConfig.branch || 'main';
+  let owner = targetOwner;
+  let repo = targetRepo;
+  if (repoOverride && repoOverride.includes('/')) {
+    const parts = repoOverride.split('/');
+    owner = parts[0].trim();
+    repo = parts[1].trim();
+  }
+  const branch = targetBranch || 'main';
   const now = new Date().toISOString();
   const files: string[] = [];
 

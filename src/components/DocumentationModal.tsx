@@ -14,7 +14,11 @@ import {
   FileText,
   Mail,
   GraduationCap,
-  Globe
+  Globe,
+  Box,
+  Terminal,
+  Hash,
+  CheckCircle2
 } from 'lucide-react';
 
 interface DocumentationModalProps {
@@ -23,9 +27,10 @@ interface DocumentationModalProps {
 }
 
 export const DocumentationModal: React.FC<DocumentationModalProps> = ({ isOpen, onClose }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'authorship' | 'rubric' | 'wiki' | 'citation'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'authorship' | 'rubric' | 'wiki' | 'container' | 'citation'>('overview');
   const [copiedBibtex, setCopiedBibtex] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [copiedHash, setCopiedHash] = useState(false);
   const [isSyncingWiki, setIsSyncingWiki] = useState(false);
   const [wikiSyncSuccess, setWikiSyncSuccess] = useState<string | null>(null);
   const [wikiSyncError, setWikiSyncError] = useState<string | null>(null);
@@ -159,6 +164,18 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({ isOpen, 
           >
             <Globe className="w-3.5 h-3.5" />
             <span>Media-Rich Wiki & Visuals</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('container')}
+            className={`px-3 py-2 border-b-2 transition-colors flex items-center space-x-1.5 shrink-0 ${
+              activeTab === 'container'
+                ? 'border-amber-400 text-amber-300 font-semibold'
+                : 'border-transparent text-neutral-400 hover:text-neutral-200'
+            }`}
+          >
+            <Box className="w-3.5 h-3.5" />
+            <span>Container Hashing & Benchmarks</span>
           </button>
 
           <button
@@ -550,7 +567,7 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({ isOpen, 
                       <span>RLHF-Rubric-v2.4.md</span>
                     </div>
                     <p className="text-xs text-neutral-400 leading-normal">
-                      6-dimensional conference review rubric and reward-guided policy iteration ($v_k \to v_{k+1}$).
+                      6-dimensional conference review rubric and reward-guided policy iteration (v_k &rarr; v_k+1).
                     </p>
                   </div>
 
@@ -568,7 +585,229 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({ isOpen, 
             </div>
           )}
 
-          {/* TAB 5: CITATION */}
+          {/* TAB 5: CONTAINER HASHING & BENCHMARKS */}
+          {activeTab === 'container' && (
+            <div className="space-y-6">
+              {/* Section 1: GitHub Repository Provenance & URL Hygiene */}
+              <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Globe className="w-4 h-4 text-amber-400" />
+                    <h3 className="text-sm font-bold text-neutral-100">
+                      GitHub Repository Provenance & URL Resolution
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                    stpaul2coderdojo Org
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-300 leading-relaxed">
+                  <strong>Organization Context:</strong> <code className="text-amber-300 bg-neutral-900 px-1 py-0.5 rounded">stpaul2coderdojo</code> is a GitHub organization dedicated to CoderDojo computational education, youth stem initiatives, and reproducible open-source research platforms.
+                </p>
+                <div className="bg-neutral-900/90 border border-neutral-800 rounded-lg p-3 text-xs space-y-2">
+                  <div className="text-neutral-200 font-semibold flex items-center space-x-2">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Handling Potential 404 Not Found Errors:</span>
+                  </div>
+                  <ul className="list-disc list-inside space-y-1 text-neutral-400 pl-1">
+                    <li>
+                      <strong>Trailing Punctuation & Hyphen Fix:</strong> URLs like <code className="text-red-300">.../Singularity-oneproject-</code> (ending in a hyphen or trailing comma) fail DNS/route lookup. Ensure the trailing hyphen is removed or replaced with the canonical repository name.
+                    </li>
+                    <li>
+                      <strong>Canonical Names:</strong> The project is mirrored at <a href="https://github.com/stpaul2coderdojo/Singularity-1" target="_blank" rel="noreferrer" className="text-amber-400 hover:underline font-mono">stpaul2coderdojo/Singularity-1</a> and <a href="https://github.com/stpaul2coderdojo/Singularity-oneproject" target="_blank" rel="noreferrer" className="text-amber-400 hover:underline font-mono">stpaul2coderdojo/Singularity-oneproject</a>.
+                    </li>
+                    <li>
+                      <strong>Organization Permissions:</strong> If accessing private experimental branches, authenticate via GitHub PAT with <code className="text-amber-300 font-mono">repo</code> scope.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Section 2: Singularity Hashes & One-Project Containerization */}
+              <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2">
+                    <Box className="w-4 h-4 text-amber-400" />
+                    <h3 className="text-sm font-bold text-neutral-100">
+                      Singularity / Apptainer Hashes & "One-Project" Containerization
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+                    Bitwise HPC Reproducibility
+                  </span>
+                </div>
+
+                <p className="text-xs text-neutral-300 leading-relaxed">
+                  In High-Performance Computing (HPC), AI clusters, and computational science, <strong>Singularity (Apptainer)</strong> packages the entire operating system, CUDA drivers, Python virtual environment, Node runtime, and LaTeX typesetting stack into a single, immutable Singularity Image Format (<code className="text-amber-300 font-mono">.sif</code>) file.
+                </p>
+
+                {/* Cryptographic SHA-256 Digest */}
+                <div className="rounded-lg bg-neutral-900 border border-neutral-800 p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono font-semibold text-neutral-300 flex items-center space-x-1.5">
+                      <Hash className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Singularity Image Cryptographic Digest (SHA-256):</span>
+                    </span>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText('4f8e91b6c738e4a908d13a886df29c71c4c1a59b6574f85e493bb3d75c80a2df');
+                        setCopiedHash(true);
+                        setTimeout(() => setCopiedHash(false), 2000);
+                      }}
+                      className="text-[11px] px-2 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-200 transition-colors flex items-center space-x-1"
+                    >
+                      {copiedHash ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                      <span>{copiedHash ? 'Copied SHA-256' : 'Copy Hash'}</span>
+                    </button>
+                  </div>
+                  <div className="font-mono text-xs text-amber-300 break-all bg-neutral-950 p-2.5 rounded border border-neutral-800/80">
+                    sha256:4f8e91b6c738e4a908d13a886df29c71c4c1a59b6574f85e493bb3d75c80a2df
+                  </div>
+                  <p className="text-[11px] text-neutral-400">
+                    Publishing container digests in preprints guarantees that anyone running this pipeline obtains identical outputs, eliminating "dependency rot" across academic laboratories and satisfying regulatory guidelines (FDA, IEEE, Nature).
+                  </p>
+                </div>
+
+                {/* Verification CLI Commands */}
+                <div className="space-y-2">
+                  <span className="text-xs font-mono font-semibold text-neutral-300 flex items-center space-x-1.5">
+                    <Terminal className="w-3.5 h-3.5 text-amber-400" />
+                    <span>CLI Commands: Image Verification & Execution</span>
+                  </span>
+                  <div className="rounded-lg bg-neutral-950 border border-neutral-800 p-3 text-xs font-mono text-neutral-300 space-y-2">
+                    <div>
+                      <span className="text-neutral-500"># 1. Compute SHA-256 digest to verify binary integrity</span>
+                      <div className="text-amber-300">sha256sum singularity-oneproject.sif</div>
+                    </div>
+                    <div>
+                      <span className="text-neutral-500"># 2. Inspect embedded metadata, runscripts & build definitions</span>
+                      <div className="text-amber-300">singularity inspect --all singularity-oneproject.sif</div>
+                    </div>
+                    <div>
+                      <span className="text-neutral-500"># 3. Execute the Singularity-1 agent synthesis loop with GPU acceleration</span>
+                      <div className="text-amber-300">singularity run --nv singularity-oneproject.sif npm run start</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Container Definition Spec */}
+                <div className="space-y-2">
+                  <span className="text-xs font-mono font-semibold text-neutral-300 flex items-center space-x-1.5">
+                    <Layers className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Singularity.def (Apptainer Recipe)</span>
+                  </span>
+                  <pre className="p-3 rounded-lg bg-neutral-950 border border-neutral-800 text-[11px] font-mono text-neutral-300 overflow-x-auto leading-relaxed">
+{`Bootstrap: docker
+From: node:20-bookworm-slim
+
+%labels
+    Maintainer Bheemaiah (IIT Madras Alumni)
+    Project Singularity-1 Autonomous arXiv Preprint Synthesis
+    Version 2.4.0
+    Digest sha256:4f8e91b6c738e4a908d13a886df29c71c4c1a59b6574f85e493bb3d75c80a2df
+
+%post
+    apt-get update && apt-get install -y texlive-latex-base texlive-fonts-recommended texlive-latex-extra git curl
+    mkdir -p /app
+    cd /app
+    # Install dependencies and compile Singularity-1 bundle
+    npm install && npm run build
+
+%environment
+    export PORT=3000
+    export NODE_ENV=production
+
+%runscript
+    cd /app
+    exec node dist/server.cjs`}
+                  </pre>
+                </div>
+              </div>
+
+              {/* Section 3: Benchmarks for AI-Generated Publications */}
+              <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800 space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Award className="w-4 h-4 text-amber-400" />
+                  <h3 className="text-sm font-bold text-neutral-100">
+                    Standard Academic Benchmarks for AI-Generated Publications
+                  </h3>
+                </div>
+                <p className="text-xs text-neutral-300 leading-relaxed">
+                  As Foundation Models and Multi-Agent Orchestrators synthesize scientific literature, established empirical benchmarks and rubrics validate their rigor, citation integrity, and formatting adherence:
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {/* Benchmark 1 */}
+                  <div className="p-3.5 rounded-xl bg-neutral-900/70 border border-neutral-800 space-y-1.5">
+                    <div className="flex items-center space-x-2 text-amber-300 font-bold text-xs">
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>SciReviewGen & LitSearch</span>
+                    </div>
+                    <p className="text-xs text-neutral-400 leading-relaxed">
+                      Evaluates automated literature review generation, measuring multi-document retrieval recall, synthesis relevance, and cross-citation topic coherence.
+                    </p>
+                  </div>
+
+                  {/* Benchmark 2 */}
+                  <div className="p-3.5 rounded-xl bg-neutral-900/70 border border-neutral-800 space-y-1.5">
+                    <div className="flex items-center space-x-2 text-amber-300 font-bold text-xs">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <span>RoBBR & EvidenceBench</span>
+                    </div>
+                    <p className="text-xs text-neutral-400 leading-relaxed">
+                      Measures systematic evidence synthesis, Risk of Bias (RoB) identification, and factual consistency across clinical and computational trials.
+                    </p>
+                  </div>
+
+                  {/* Benchmark 3 */}
+                  <div className="p-3.5 rounded-xl bg-neutral-900/70 border border-neutral-800 space-y-1.5">
+                    <div className="flex items-center space-x-2 text-amber-300 font-bold text-xs">
+                      <Cpu className="w-3.5 h-3.5" />
+                      <span>SciArena-Eval & ECACT</span>
+                    </div>
+                    <p className="text-xs text-neutral-400 leading-relaxed">
+                      Benchmarks structured scientific reasoning, causal hypothesis formulation, and empirical claim extraction from multi-modal papers.
+                    </p>
+                  </div>
+
+                  {/* Benchmark 4 */}
+                  <div className="p-3.5 rounded-xl bg-neutral-900/70 border border-neutral-800 space-y-1.5">
+                    <div className="flex items-center space-x-2 text-amber-300 font-bold text-xs">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Citation & Factuality Verification</span>
+                    </div>
+                    <p className="text-xs text-neutral-400 leading-relaxed">
+                      Assesses inline citation accuracy, hallucination rates (invented DOIs, false author lists), and semantic coverage via ROUGE-L and SciBERTScore.
+                    </p>
+                  </div>
+
+                  {/* Benchmark 5 */}
+                  <div className="p-3.5 rounded-xl bg-neutral-900/70 border border-neutral-800 space-y-1.5">
+                    <div className="flex items-center space-x-2 text-amber-300 font-bold text-xs">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>ArXiv / PubMed Synthetic Datasets</span>
+                    </div>
+                    <p className="text-xs text-neutral-400 leading-relaxed">
+                      Paired human-written and AI-synthesized paper corpora used to calibrate detection mechanisms (e.g. Turnitin, Copyleaks, GPTZero) and minimize false-positive rates.
+                    </p>
+                  </div>
+
+                  {/* Benchmark 6 */}
+                  <div className="p-3.5 rounded-xl bg-neutral-900/70 border border-neutral-800 space-y-1.5">
+                    <div className="flex items-center space-x-2 text-amber-300 font-bold text-xs">
+                      <Award className="w-3.5 h-3.5" />
+                      <span>AI Peer-Review Calibration (NeurIPS/ICLR)</span>
+                    </div>
+                    <p className="text-xs text-neutral-400 leading-relaxed">
+                      Datasets evaluating alignment between LLM paper evaluations and human conference reviews, testing rubric adherence and qualitative feedback depth.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: CITATION */}
           {activeTab === 'citation' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">

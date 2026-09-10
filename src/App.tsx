@@ -357,6 +357,7 @@ export default function App() {
           isDownloadingPdf={isDownloadingPdf}
           onOpenGitHubSync={() => setShowGitHubSync(true)}
           onOpenDocs={() => setShowDocsModal(true)}
+          onOpenCopilot={() => setShowCopilotModal(true)}
           gitHubConnected={gitHubConfig?.connected}
           gitHubRepo={gitHubConfig ? `${gitHubConfig.owner}/${gitHubConfig.repo}` : ''}
           activeVersion={publication.version}
@@ -481,6 +482,13 @@ export default function App() {
       <DocumentationModal
         isOpen={showDocsModal}
         onClose={() => setShowDocsModal(false)}
+      />
+
+      {/* Context-Aware Gemini Research Copilot Modal */}
+      <ResearchCopilotModal
+        isOpen={showCopilotModal}
+        onClose={() => setShowCopilotModal(false)}
+        publication={publication}
       />
 
       {/* Domain Selection Modal (Triggered from header) */}

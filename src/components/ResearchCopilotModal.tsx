@@ -31,7 +31,7 @@ interface ResearchCopilotModalProps {
   isOpen: boolean;
   onClose: () => void;
   publication: ArXivPublication | null;
-  rubricReview: HumanReviewRubric | null;
+  rubricReview?: HumanReviewRubric | null;
 }
 
 export const ResearchCopilotModal: React.FC<ResearchCopilotModalProps> = ({
@@ -269,7 +269,7 @@ How would you like to explore this research? You can ask me to:
                 </span>
                 {rubricReview && (
                   <span className="text-emerald-400 font-mono text-[11px] bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
-                    ★ {rubricReview.overallScore.toFixed(1)}/10
+                    ★ {rubricReview.recommendation.replace('_', ' ').toUpperCase()}
                   </span>
                 )}
               </p>
@@ -352,18 +352,18 @@ How would you like to explore this research? You can ask me to:
               <span>arXiv ID: {publication?.arxivId || '2603.04891'} v{publication?.version || 1}</span>
             </div>
             <div className="text-amber-400/90 truncate">
-              Theorem: {publication?.solutionArchitecture?.theoreticalGuarantees?.[0] || 'Asymptotic bound O(1/√T)'}
+              Theorem: {publication?.solution?.theoreticalGuarantees?.[0] || 'Asymptotic bound O(1/√T)'}
             </div>
             <div className="text-neutral-400 truncate">
               Objective: {publication?.problemStatement?.mathematicalFormulation || 'min L(θ)'}
             </div>
-            {rubricReview && (
+            {rubricReview && rubricReview.dimensions && (
               <div className="flex flex-wrap gap-2 text-[10px] text-emerald-400 pt-1">
-                <span>Nov: {rubricReview.scores?.novelty}/10</span>
-                <span>Rig: {rubricReview.scores?.technicalRigor}/10</span>
-                <span>Sig: {rubricReview.scores?.empiricalSignificance}/10</span>
-                <span>Cla: {rubricReview.scores?.clarity}/10</span>
-                <span>Rep: {rubricReview.scores?.reproducibility}/10</span>
+                <span>Nov: {rubricReview.dimensions.novelty?.score}/5</span>
+                <span>Rig: {rubricReview.dimensions.technicalRigor?.score}/5</span>
+                <span>Meth: {rubricReview.dimensions.methodologicalSoundness?.score}/5</span>
+                <span>Sig: {rubricReview.dimensions.empiricalSignificance?.score}/5</span>
+                <span>Cla: {rubricReview.dimensions.expositionClarity?.score}/5</span>
               </div>
             )}
           </div>

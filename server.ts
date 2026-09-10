@@ -16,6 +16,7 @@ import {
   syncWikiToGitHub,
   getLogHistory
 } from './server/github';
+import { evaluatePublicationBenchmarks } from './src/utils/benchmarkEvaluator';
 
 dotenv.config();
 
@@ -863,6 +864,9 @@ ${allReferences.map(r => `\\bibitem{${r.key}} ${r.authors}, \\emph{${r.title}}, 
       rlhfHistory: []
     };
 
+    // Attach comprehensive academic benchmark evaluation
+    (publication as any).benchmarkEvaluation = evaluatePublicationBenchmarks(publication as any);
+
     // Auto-log paper to GitHub if enabled
     const ghConfig = getGitHubConfig();
     if (ghConfig.autoLogPapers) {
@@ -970,6 +974,9 @@ Return valid JSON:
       rlhfHistory: [...(publication.rlhfHistory || []), rlhfIteration]
     };
 
+    // Re-evaluate benchmarks across all dimensions post-refinement
+    (updatedPublication as any).benchmarkEvaluation = evaluatePublicationBenchmarks(updatedPublication as any);
+
     // Auto-log review and revised paper to GitHub if enabled
     const ghConfig = getGitHubConfig();
     if (ghConfig.autoLogReviews) {
@@ -987,6 +994,24 @@ Return valid JSON:
   } catch (err: any) {
     console.error('Error in RLHF refinement:', err);
     res.status(500).json({ success: false, error: err.message || 'RLHF refinement failed' });
+  }
+});
+
+// Endpoint: Dynamic Academic Benchmark Evaluation
+app.post('/api/evaluate/benchmarks', (req, res) => {
+  try {
+    const { publication } = req.body;
+    if (!publication) {
+      return res.status(400).json({ error: 'Publication object is required for benchmark evaluation.' });
+    }
+    const evaluation = evaluatePublicationBenchmarks(publication);
+    return res.json({
+      success: true,
+      data: evaluation
+    });
+  } catch (err: any) {
+    console.error('Error in benchmark evaluation:', err);
+    return res.status(500).json({ success: false, error: err.message || 'Benchmark evaluation failed.' });
   }
 });
 
