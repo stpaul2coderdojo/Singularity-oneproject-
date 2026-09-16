@@ -245,7 +245,7 @@ app.get('/api/export/zip', (req, res) => {
 import os, zipfile
 
 zip_path = '/tmp/singularity_project.zip'
-exclude_dirs = {'node_modules', '.git', 'dist', 'build', '.next', '.cache'}
+exclude_dirs = {'node_modules', '.git', 'build', '.next', '.cache'}
 exclude_files = {'.DS_Store'}
 
 with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
@@ -1476,14 +1476,17 @@ function buildStandardSections(problem: any, solution: any) {
 
 // Vite middleware for development vs static serve for production
 async function startServer() {
-  if (process.env.NODE_ENV !== 'production') {
+  const distPath = path.join(process.cwd(), 'dist');
+  const hasDist = fs.existsSync(distPath) && fs.existsSync(path.join(distPath, 'index.html'));
+
+  if (process.env.NODE_ENV !== 'production' || !hasDist) {
+    console.log(`[Singularity-1] ${!hasDist ? 'Production dist/ not found, mounting dynamic Vite middleware...' : 'Starting Vite dev server...'}`);
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa'
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
