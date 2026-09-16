@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'fs';
+import { execSync } from 'child_process';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
@@ -19,9 +20,6 @@ import {
 import { evaluatePublicationBenchmarks } from './src/utils/benchmarkEvaluator';
 
 dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = 3000;
@@ -240,6 +238,136 @@ app.post('/api/github/sync-wiki', async (req, res) => {
   }
 });
 
+// 10. Direct Download Full Codebase as ZIP (Bypasses AI Studio export limits)
+app.get('/api/export/zip', (req, res) => {
+  try {
+    const pythonScript = `
+import os, zipfile
+
+zip_path = '/tmp/singularity_project.zip'
+exclude_dirs = {'node_modules', '.git', 'dist', 'build', '.next', '.cache'}
+exclude_files = {'.DS_Store'}
+
+with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+    for root, dirs, files in os.walk('.'):
+        dirs[:] = [d for d in dirs if d not in exclude_dirs]
+        for f in files:
+            if f in exclude_files: continue
+            if f.startswith('.env') and f != '.env.example': continue
+            fp = os.path.join(root, f)
+            arcname = os.path.relpath(fp, '.')
+            zf.write(fp, arcname)
+`;
+    execSync(`python3 -c "${pythonScript.replace(/"/g, '\\"')}"`, { cwd: process.cwd() });
+    
+    const zipPath = '/tmp/singularity_project.zip';
+    res.download(zipPath, 'singularity-oneproject.zip', () => {
+      try {
+        if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
+      } catch (e) {}
+    });
+  } catch (err: any) {
+    console.error('ZIP export error:', err);
+    res.status(500).json({ error: 'Failed to generate ZIP: ' + err.message });
+  }
+});
+
+// 11. Push Entire Codebase to GitHub Repository (Direct 1-Click Sync)
+app.post('/api/github/push-full-codebase', async (req, res) => {
+  try {
+    const { token: providedToken, owner: providedOwner, repo: providedRepo, branch = 'main', commitMessage } = req.body;
+    
+    const token = providedToken || getEffectiveToken();
+    if (!token) {
+      return res.status(400).json({ 
+        error: 'GitHub Personal Access Token is required. Please provide a token with "repo" scope.' 
+      });
+    }
+
+    let owner = (providedOwner || '').trim();
+    let repo = (providedRepo || '').trim();
+    if (!owner || !repo) {
+      return res.status(400).json({ error: 'Repository owner and repository name are required.' });
+    }
+
+    // Check / Auto-create repository on GitHub if missing
+    try {
+      const checkRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+          'User-Agent': 'Singularity-1-Agent'
+        }
+      });
+      if (checkRes.status === 404) {
+        console.log(`Repository ${owner}/${repo} not found. Attempting to auto-create on GitHub...`);
+        const createRes = await fetch('https://api.github.com/user/repos', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json',
+            'User-Agent': 'Singularity-1-Agent'
+          },
+          body: JSON.stringify({
+            name: repo,
+            description: 'Singularity-1 Autonomous Research & Preprints System by Dr. Bheemaiah Anil K., Synergy Robotics',
+            private: false,
+            auto_init: true
+          })
+        });
+        if (!createRes.ok) {
+          const createErr = await createRes.text();
+          console.warn('Repository auto-create note:', createErr);
+        }
+      }
+    } catch (apiErr) {
+      console.warn('Pre-flight GitHub API check note:', apiErr);
+    }
+
+    // Ensure working tree is clean and committed
+    try {
+      execSync('git add .', { cwd: process.cwd() });
+      const msg = (commitMessage || 'feat: Singularity-1 production release by Dr. Bheemaiah Anil K., Synergy Robotics').replace(/"/g, '\\"');
+      execSync(`git commit -m "${msg}"`, { cwd: process.cwd() });
+    } catch (commitErr) {
+      // Nothing new to commit or already committed
+    }
+
+    // Set remote origin with credentials, push, then immediately remove remote origin
+    const remoteUrl = `https://${token}@github.com/${owner}/${repo}.git`;
+    
+    try {
+      execSync('git remote remove origin', { cwd: process.cwd(), stdio: 'ignore' });
+    } catch (e) {}
+
+    try {
+      execSync(`git remote add origin ${remoteUrl}`, { cwd: process.cwd(), stdio: 'ignore' });
+      execSync(`git branch -M ${branch}`, { cwd: process.cwd() });
+      execSync(`git push -u origin ${branch} --force`, { cwd: process.cwd(), stdio: 'pipe' });
+    } finally {
+      // Crucial: sanitize environment by removing remote containing the token
+      try {
+        execSync('git remote remove origin', { cwd: process.cwd(), stdio: 'ignore' });
+      } catch (e) {}
+    }
+
+    res.json({
+      success: true,
+      repoUrl: `https://github.com/${owner}/${repo}`,
+      branch,
+      message: `Successfully pushed entire codebase to https://github.com/${owner}/${repo} on branch ${branch}`
+    });
+  } catch (err: any) {
+    console.error('Git push error:', err);
+    let safeMsg = err.message || 'Unknown git error';
+    if (req.body?.token) {
+      safeMsg = safeMsg.split(req.body.token).join('[REDACTED_TOKEN]');
+    }
+    res.status(500).json({ success: false, error: safeMsg });
+  }
+});
+
 // ==========================================
 // CONTEXT-AWARE GEMINI RESEARCH COPILOT CHATBOT
 // ==========================================
@@ -287,7 +415,7 @@ Provide constructive, rigorous technical collaboration. Help polish the methodol
 - Title: "${publication.title}"
 - arXiv Identifier: arXiv:${publication.arxivId || '2603.04891'} (Version: v${publication.version || 1})
 - Primary Subject Category: ${publication.primaryCategory || 'cs.AI'}
-- Lead Researcher / PI: Bheemaiah (IIT Madras Alumni, bheemaiah@alumni.iitm.ac.in)
+- Lead Researcher / PI: Dr. Bheemaiah Anil K. (Director, Synergy Robotics • IIT Madras Alumni, bheemaiah@alumni.iitm.ac.in)
 - Co-Authors: Google Antigravity Multi-Agent Collective
 - Abstract:
 "${publication.abstract || 'N/A'}"
@@ -329,7 +457,7 @@ ${Array.isArray(rubricReview.actionableDirectives) ? rubricReview.actionableDire
     }
 
     const systemInstruction = `You are the "Singularity-1 AI Research Copilot", an elite autonomous scientific assistant and conversational co-author embedded in the Singularity-1 arXiv Preprint Platform.
-The platform is developed under the leadership of Principal Investigator Bheemaiah (Indian Institute of Technology Madras Alumni, email: bheemaiah@alumni.iitm.ac.in) and the Google Antigravity Agent Collective.
+The platform is developed under the leadership of Principal Investigator Dr. Bheemaiah Anil K. (Director, Synergy Robotics • Indian Institute of Technology Madras Alumni, email: bheemaiah@alumni.iitm.ac.in) and the Google Antigravity Agent Collective.
 
 ${personaGuidance}
 
@@ -471,7 +599,7 @@ Having evaluated the preprint against the **arXiv Rubric v2.4** (Overall: **${ov
 
 I am actively synchronized with your preprint:
 - **Title**: *"${paperTitle}"* (arXiv:${publication?.arxivId || '2603.04891'} v${version})
-- **Lead Researcher**: **Bheemaiah** (IIT Madras Alumni, \`bheemaiah@alumni.iitm.ac.in\`)
+- **Lead Researcher**: **Dr. Bheemaiah Anil K.** (Director, Synergy Robotics • IIT Madras Alumni, \`bheemaiah@alumni.iitm.ac.in\`)
 - **Current RLHF Score**: **${overallScore}/10** across 6 conference dimensions.
 
 Regarding your query: *"**${message}**"*

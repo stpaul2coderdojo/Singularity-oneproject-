@@ -132,6 +132,59 @@ export async function exchangeOAuthCode(code: string, redirectUri: string): Prom
 }
 
 /**
+ * Helper to verify repository existence, auto-create if missing, and detect default branch
+ */
+export async function ensureRepositoryExists(owner: string, repo: string, token: string): Promise<string> {
+  try {
+    const repoRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+        'User-Agent': 'Singularity-1-Agent'
+      }
+    });
+
+    if (repoRes.ok) {
+      const repoData = await repoRes.json();
+      return repoData.default_branch || 'main';
+    }
+
+    // If 404, check if current user is the owner and auto-create the repository
+    if (repoRes.status === 404) {
+      const user = await fetchGitHubUser(token);
+      if (user && user.login.toLowerCase() === owner.toLowerCase()) {
+        console.log(`[Singularity-1] Repository ${owner}/${repo} does not exist. Auto-creating repository...`);
+        const createRes = await fetch('https://api.github.com/user/repos', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json',
+            'User-Agent': 'Singularity-1-Agent'
+          },
+          body: JSON.stringify({
+            name: repo,
+            description: 'Singularity-1 Autonomous arXiv Preprint Synthesis & SOTA RLHF Provenance Repository',
+            private: false,
+            auto_init: true
+          })
+        });
+
+        if (createRes.ok) {
+          const created = await createRes.json();
+          console.log(`[Singularity-1] Successfully created https://github.com/${owner}/${repo} (branch: ${created.default_branch})`);
+          return created.default_branch || 'main';
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[Singularity-1] Repository pre-flight check error:', err);
+  }
+
+  return 'main';
+}
+
+/**
  * Helper to upload or update a file in a GitHub repository
  */
 async function putFileToGitHub(
@@ -186,7 +239,31 @@ async function putFileToGitHub(
 
   if (!putRes.ok) {
     const errorText = await putRes.text();
-    throw new Error(`GitHub API Error (${putRes.status}): ${errorText}`);
+    let parsedMsg = errorText;
+    try {
+      const parsed = JSON.parse(errorText);
+      parsedMsg = parsed.message || errorText;
+    } catch (e) {}
+
+    if (putRes.status === 404) {
+      throw new Error(
+        `GitHub repository or branch "${branch}" not found (${owner}/${repo}). If this repository is not created yet, please create it at https://github.com/new (with "Add a README file" checked) or verify your repository permissions.`
+      );
+    } else if (putRes.status === 401) {
+      throw new Error(
+        'GitHub authentication expired or token invalid. Please reconnect via OAuth in the drawer or update GITHUB_TOKEN.'
+      );
+    } else if (putRes.status === 403) {
+      throw new Error(
+        `Write permission denied for repository "${owner}/${repo}". Ensure your GitHub Personal Access Token or OAuth grant includes the "repo" (Contents: Read and write) permission scope.`
+      );
+    } else if (putRes.status === 409) {
+      throw new Error(
+        `Git branch conflict or repository is empty on branch "${branch}". Ensure the repository has at least one initial commit (e.g. README.md).`
+      );
+    }
+
+    throw new Error(`GitHub API Error (${putRes.status}): ${parsedMsg}`);
   }
 
   const result = await putRes.json();
@@ -358,6 +435,9 @@ export async function logPaperToGitHub(
   }
 
   try {
+    const effectiveBranch = await ensureRepositoryExists(owner, repo, token);
+    const branchToUse = targetBranch || effectiveBranch || 'main';
+
     const markdownContent = formatPublicationMarkdown(publication);
     const commitMsg = `[Preprint] Publish ${publication.arxivId}: ${publication.title.substring(0, 60)}...`;
 
@@ -368,7 +448,7 @@ export async function logPaperToGitHub(
       `${paperDir}/README.md`,
       markdownContent,
       `${commitMsg} (Markdown)`,
-      targetBranch,
+      branchToUse,
       token
     );
 
@@ -380,7 +460,7 @@ export async function logPaperToGitHub(
         `${paperDir}/paper.tex`,
         publication.latexSource,
         `${commitMsg} (LaTeX Source)`,
-        targetBranch,
+        branchToUse,
         token
       );
     }
@@ -393,7 +473,7 @@ export async function logPaperToGitHub(
         `${paperDir}/paper.bib`,
         publication.bibtex,
         `${commitMsg} (BibTeX)`,
-        targetBranch,
+        branchToUse,
         token
       );
     }
@@ -405,7 +485,7 @@ export async function logPaperToGitHub(
       `${paperDir}/metadata.json`,
       JSON.stringify(publication, null, 2),
       `${commitMsg} (Metadata JSON)`,
-      targetBranch,
+      branchToUse,
       token
     );
 
@@ -420,7 +500,7 @@ export async function logPaperToGitHub(
           'README.md',
           rootReadmeContent,
           `[Docs] Update Singularity-1 documentation & visual website README`,
-          targetBranch,
+          branchToUse,
           token
         );
         files.push('README.md');
@@ -434,8 +514,8 @@ export async function logPaperToGitHub(
           repo,
           'AUTHORS.md',
           authorsContent,
-          `[Authorship] Update Bheemaiah (IIT Madras Alumni) & Antigravity collective`,
-          targetBranch,
+          `[Authorship] Update Dr. Bheemaiah Anil K. & Antigravity collective`,
+          branchToUse,
           token
         );
         files.push('AUTHORS.md');
@@ -452,7 +532,7 @@ export async function logPaperToGitHub(
             'wiki/Home.md',
             fs.readFileSync(wikiHome, 'utf-8'),
             `[Wiki] Update Singularity-1 Wiki Home`,
-            targetBranch,
+            branchToUse,
             token
           );
           files.push('wiki/Home.md');
@@ -546,6 +626,9 @@ export async function logReviewToGitHub(
   }
 
   try {
+    const effectiveBranch = await ensureRepositoryExists(owner, repo, token);
+    const branchToUse = targetBranch || effectiveBranch || 'main';
+
     const markdownContent = formatReviewMarkdown(publication, review);
     const commitMsg = `[Review] ${review.recommendation.toUpperCase()} for ${publication.arxivId} v${publication.version} (Score: ${review.weightedScore.toFixed(2)}/5.00)`;
 
@@ -556,7 +639,7 @@ export async function logReviewToGitHub(
       reviewFileMd,
       markdownContent,
       commitMsg,
-      targetBranch,
+      branchToUse,
       token
     );
 
@@ -567,7 +650,7 @@ export async function logReviewToGitHub(
       reviewFileJson,
       JSON.stringify(review, null, 2),
       `${commitMsg} (JSON Schema)`,
-      targetBranch,
+      branchToUse,
       token
     );
 
@@ -621,11 +704,13 @@ export async function syncWikiToGitHub(repoOverride?: string): Promise<GitHubLog
     owner = parts[0].trim();
     repo = parts[1].trim();
   }
-  const branch = targetBranch || 'main';
   const now = new Date().toISOString();
   const files: string[] = [];
 
   try {
+    const effectiveBranch = await ensureRepositoryExists(owner, repo, token);
+    const branchToUse = targetBranch || effectiveBranch || 'main';
+
     const wikiDir = path.join(process.cwd(), 'wiki');
     if (!fs.existsSync(wikiDir)) {
       throw new Error('Wiki directory does not exist on disk.');
@@ -649,7 +734,7 @@ export async function syncWikiToGitHub(repoOverride?: string): Promise<GitHubLog
 
     const wikiFiles = getFilesRecursively(wikiDir);
     let lastSha = '';
-    let lastUrl = `https://github.com/${owner}/${repo}/tree/${targetBranch}/wiki`;
+    let lastUrl = `https://github.com/${owner}/${repo}/tree/${branchToUse}/wiki`;
 
     for (const relPath of wikiFiles) {
       const fullPath = path.join(wikiDir, relPath);
@@ -660,8 +745,8 @@ export async function syncWikiToGitHub(repoOverride?: string): Promise<GitHubLog
         repo,
         targetRepoPath,
         content,
-        `[Wiki & Media] Sync ${relPath} - Singularity-1 by Bheemaiah (IIT Madras Alumni)`,
-        targetBranch,
+        `[Wiki & Media] Sync ${relPath} - Singularity-1 by Dr. Bheemaiah Anil K., Synergy Robotics`,
+        branchToUse,
         token
       );
       files.push(targetRepoPath);

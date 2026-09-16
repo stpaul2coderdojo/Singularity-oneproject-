@@ -15,7 +15,10 @@ import {
   FolderGit2,
   Check,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  Download,
+  ArrowRight,
+  Lock
 } from 'lucide-react';
 import { GitHubConfig, GitHubLogEntry, ArXivPublication } from '../types';
 
@@ -44,6 +47,16 @@ export const GitHubSyncDrawer: React.FC<GitHubSyncDrawerProps> = ({
   const [branchInput, setBranchInput] = useState('main');
   const [autoLogPapers, setAutoLogPapers] = useState(true);
   const [autoLogReviews, setAutoLogReviews] = useState(true);
+
+  // Full Codebase Push States
+  const [codebaseToken, setCodebaseToken] = useState('');
+  const [codebaseOwner, setCodebaseOwner] = useState('');
+  const [codebaseRepo, setCodebaseRepo] = useState('singularity-oneproject');
+  const [codebaseBranch, setCodebaseBranch] = useState('main');
+  const [codebaseCommitMsg, setCodebaseCommitMsg] = useState('feat: Singularity-1 production release by Dr. Bheemaiah Anil K., Synergy Robotics');
+  const [isPushingCodebase, setIsPushingCodebase] = useState(false);
+  const [codebasePushResult, setCodebasePushResult] = useState<{ repoUrl: string; branch: string; message: string } | null>(null);
+  const [codebasePushError, setCodebasePushError] = useState<string | null>(null);
 
   const fetchStatusAndLogs = async () => {
     try {
@@ -185,6 +198,50 @@ export const GitHubSyncDrawer: React.FC<GitHubSyncDrawerProps> = ({
       onShowToast(err.message || 'Failed to log paper', 'error');
     } finally {
       setIsLoggingPaper(false);
+    }
+  };
+
+  const handlePushFullCodebase = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsPushingCodebase(true);
+    setCodebasePushResult(null);
+    setCodebasePushError(null);
+
+    const targetOwner = (codebaseOwner || ownerInput || config?.owner || config?.user?.login || '').trim();
+    const targetRepo = (codebaseRepo || repoInput || 'singularity-oneproject').trim();
+
+    if (!targetOwner || !targetRepo) {
+      setCodebasePushError('Please specify both repository owner and repository name.');
+      setIsPushingCodebase(false);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/github/push-full-codebase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: codebaseToken.trim() || undefined,
+          owner: targetOwner,
+          repo: targetRepo,
+          branch: codebaseBranch.trim() || 'main',
+          commitMessage: codebaseCommitMsg.trim()
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to push codebase to GitHub');
+      }
+
+      setCodebasePushResult(data);
+      onShowToast(`Successfully pushed codebase to ${data.repoUrl}!`, 'success');
+      fetchStatusAndLogs();
+    } catch (err: any) {
+      setCodebasePushError(err.message || 'Push failed');
+      onShowToast(err.message || 'Failed to push codebase', 'error');
+    } finally {
+      setIsPushingCodebase(false);
     }
   };
 
@@ -411,6 +468,170 @@ export const GitHubSyncDrawer: React.FC<GitHubSyncDrawerProps> = ({
               </button>
             </div>
           </form>
+
+          {/* Full Codebase Export & Direct GitHub Push Card */}
+          <div className="rounded-xl border border-amber-500/30 bg-neutral-950/70 p-5 space-y-4 shadow-lg">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-neutral-100 flex items-center space-x-2">
+                  <FolderGit2 className="w-4 h-4 text-amber-400" />
+                  <span>Full Project Export & GitHub Push</span>
+                </h3>
+                <p className="text-xs text-neutral-400 mt-0.5">
+                  Directly push all 48 codebase files (Docker, Singularity, scripts, UI) to GitHub, or download an instant offline ZIP bundle.
+                </p>
+              </div>
+              <span className="text-[10px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                Direct Sync
+              </span>
+            </div>
+
+            {/* Quick 1-Click ZIP Download */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-lg bg-neutral-900 border border-neutral-800 gap-3">
+              <div className="space-y-0.5">
+                <div className="text-xs font-medium text-neutral-200 flex items-center space-x-1.5">
+                  <Download className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Instant Complete Codebase (.zip)</span>
+                </div>
+                <p className="text-[11px] text-neutral-400">
+                  Instant offline backup including Dockerfile, Singularity.def, server.ts, start.cjs, and documentation.
+                </p>
+              </div>
+              <a
+                href="/api/export/zip"
+                download="singularity-oneproject.zip"
+                className="inline-flex items-center justify-center space-x-1.5 px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-neutral-950 text-xs font-semibold shrink-0 transition-colors shadow-sm"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download ZIP</span>
+              </a>
+            </div>
+
+            {/* Direct Push Codebase to GitHub Form */}
+            <form onSubmit={handlePushFullCodebase} className="space-y-3 pt-1">
+              <div className="text-xs font-medium text-neutral-300 flex items-center space-x-1.5">
+                <GitBranch className="w-3.5 h-3.5 text-amber-400" />
+                <span>Push Full Repository to GitHub (1-Click)</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">Target Repository (owner/repo)</label>
+                  <input
+                    type="text"
+                    value={codebaseRepo.includes('/') ? codebaseRepo : `${codebaseOwner || ownerInput || config?.owner || config?.user?.login || 'username'}/${codebaseRepo}`}
+                    onChange={e => {
+                      const val = e.target.value;
+                      if (val.includes('/')) {
+                        const [o, r] = val.split('/');
+                        setCodebaseOwner(o.trim());
+                        setCodebaseRepo(r.trim());
+                      } else {
+                        setCodebaseRepo(val);
+                      }
+                    }}
+                    placeholder="bheemaiah/singularity-oneproject"
+                    className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-1.5 text-xs text-neutral-200 focus:outline-none focus:border-amber-500 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-mono text-neutral-400 mb-1">Target Branch</label>
+                  <input
+                    type="text"
+                    value={codebaseBranch}
+                    onChange={e => setCodebaseBranch(e.target.value)}
+                    placeholder="main"
+                    className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-1.5 text-xs text-neutral-200 focus:outline-none focus:border-amber-500 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-mono text-neutral-400 mb-1 flex items-center justify-between">
+                  <span className="flex items-center space-x-1">
+                    <Lock className="w-3 h-3 text-neutral-500" />
+                    <span>GitHub Personal Access Token (PAT)</span>
+                  </span>
+                  <a
+                    href="https://github.com/settings/tokens/new?scopes=repo&description=Singularity-1-Direct-Push"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[10px] text-amber-400 hover:underline flex items-center space-x-0.5"
+                  >
+                    <span>Generate PAT (repo scope)</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                </label>
+                <input
+                  type="password"
+                  value={codebaseToken}
+                  onChange={e => setCodebaseToken(e.target.value)}
+                  placeholder={config?.connected ? 'Using connected GitHub OAuth token (or paste PAT here)' : 'ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'}
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-1.5 text-xs text-neutral-200 focus:outline-none focus:border-amber-500 font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-mono text-neutral-400 mb-1">Commit Message</label>
+                <input
+                  type="text"
+                  value={codebaseCommitMsg}
+                  onChange={e => setCodebaseCommitMsg(e.target.value)}
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-1.5 text-xs text-neutral-200 focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              {codebasePushResult && (
+                <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 space-y-1">
+                  <div className="font-semibold flex items-center space-x-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Codebase successfully pushed!</span>
+                  </div>
+                  <p className="text-[11px] text-neutral-300">
+                    Your entire repository has been deployed to GitHub branch <code className="text-emerald-400 font-mono">{codebasePushResult.branch}</code>.
+                  </p>
+                  <a
+                    href={codebasePushResult.repoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center space-x-1 text-emerald-400 underline hover:text-emerald-300 font-mono text-[11px] pt-1"
+                  >
+                    <span>View Repository on GitHub</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              )}
+
+              {codebasePushError && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-300 flex items-start space-x-2">
+                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <div className="font-medium">Push Failed</div>
+                    <p className="text-[11px] text-red-300/90 leading-relaxed font-mono">{codebasePushError}</p>
+                  </div>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isPushingCodebase}
+                className="w-full text-xs font-semibold py-2.5 px-4 rounded-lg bg-neutral-100 hover:bg-white text-neutral-950 transition-all flex items-center justify-center space-x-2 shadow-sm disabled:opacity-50"
+              >
+                {isPushingCodebase ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Committing & Pushing All Files to GitHub...</span>
+                  </>
+                ) : (
+                  <>
+                    <UploadCloud className="w-3.5 h-3.5" />
+                    <span>Push Entire Repository to GitHub</span>
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
 
           {/* GitHub Commit Audit Log Section */}
           <div className="space-y-3">

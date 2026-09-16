@@ -140,6 +140,17 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           )}
 
+          {/* Direct Codebase ZIP Export Button */}
+          <a
+            href="/api/export/zip"
+            download="singularity-oneproject.zip"
+            className="text-xs font-medium px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-800 hover:border-amber-500/40 transition-colors flex items-center space-x-1.5"
+            title="Download Complete Codebase ZIP (Bypasses AI Studio export limits)"
+          >
+            <Download className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden lg:inline">Export ZIP</span>
+          </a>
+
           {/* Context-Aware Gemini Copilot Trigger */}
           {onOpenCopilot && (
             <button
@@ -157,7 +168,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={onOpenDocs}
               className="text-xs font-medium px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-800 hover:border-amber-500/40 transition-colors flex items-center space-x-1.5"
-              title="Documentation, Architecture & Authorship (Bheemaiah, IIT Madras Alumni)"
+              title="Documentation, Architecture & Authorship (Dr. Bheemaiah Anil K., Director, Synergy Robotics • IIT Madras Alumni)"
             >
               <BookOpen className="w-3.5 h-3.5 text-amber-400" />
               <span className="hidden md:inline">Docs & Authors</span>

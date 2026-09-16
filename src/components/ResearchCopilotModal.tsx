@@ -46,7 +46,7 @@ export const ResearchCopilotModal: React.FC<ResearchCopilotModalProps> = ({
       role: 'model',
       content: `Greetings! I am the **Singularity-1 AI Research Copilot**, powered by Google DeepMind's **Gemini 3.8 Flash**.
 
-I am synchronized with the active preprint by Principal Investigator **Bheemaiah** (IIT Madras Alumni, \`bheemaiah@alumni.iitm.ac.in\`) and the Google Antigravity Agent Collective.
+I am synchronized with the active preprint by Principal Investigator **Dr. Bheemaiah Anil K.** (Director, Synergy Robotics • IIT Madras Alumni, \`bheemaiah@alumni.iitm.ac.in\`) and the Google Antigravity Agent Collective.
 
 How would you like to explore this research? You can ask me to:
 - 📐 **Deconstruct the mathematical formulation** and convergence bounds
@@ -348,7 +348,7 @@ How would you like to explore this research? You can ask me to:
         {showContextDetails && (
           <div className="px-4 py-3 bg-black/40 border-b border-neutral-800 text-xs text-neutral-300 max-h-36 overflow-y-auto space-y-1.5 font-mono">
             <div className="flex justify-between text-neutral-400">
-              <span>PI: Bheemaiah (IIT Madras Alumni)</span>
+              <span>PI: Dr. Bheemaiah Anil K. (Director, Synergy Robotics)</span>
               <span>arXiv ID: {publication?.arxivId || '2603.04891'} v{publication?.version || 1}</span>
             </div>
             <div className="text-amber-400/90 truncate">
@@ -505,7 +505,7 @@ How would you like to explore this research? You can ask me to:
           </div>
           <div className="flex items-center justify-between text-[11px] text-neutral-500 mt-2 px-1">
             <span>Powered by Gemini 3.8 Flash • Context-grounded in preprint state</span>
-            <span>PI: Bheemaiah (IIT Madras Alumni)</span>
+            <span>PI: Dr. Bheemaiah Anil K. (Director, Synergy Robotics • IIT Madras Alumni)</span>
           </div>
         </div>
 

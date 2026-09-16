@@ -42,12 +42,12 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({ isOpen, 
   const authorEmail = 'bheemaiah@alumni.iitm.ac.in';
 
   const bibtexCitation = `@article{bheemaiah2026singularity1,
-  title={Singularity-1: An Autonomous Multi-Agent Platform for arXiv Preprint Synthesis with Human-in-the-Loop RLHF Rubric Optimization},
-  author={Bheemaiah and {Google Antigravity Agent Collective}},
+  title={Singularity-1: An Autonomous Multi-Agent Platform for AI Alignment, Mechanistic Interpretability, Empirical Benchmarking and SOTA RLHF Synthesis},
+  author={Bheemaiah Anil K., Dr. and {Google Antigravity Agent Collective}},
   journal={arXiv preprint arXiv:2603.04891 [cs.AI]},
   year={2026},
-  institution={Indian Institute of Technology Madras Alumni},
-  note={Available at: ${prodUrl}},
+  institution={Synergy Robotics, Indian Institute of Technology Madras Alumni},
+  note={Director: Dr. Bheemaiah Anil K., Synergy Robotics. Available at: ${prodUrl}},
   email={${authorEmail}}
 }`;
 
@@ -303,23 +303,23 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({ isOpen, 
               <div className="p-6 rounded-2xl bg-neutral-950 border border-amber-500/30 shadow-lg space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center space-x-4">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-600 to-orange-400 flex items-center justify-center text-neutral-950 font-bold text-xl shadow-md">
-                      B
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-600 via-orange-500 to-amber-300 flex items-center justify-center text-neutral-950 font-bold text-xl shadow-md">
+                      BA
                     </div>
                     <div>
                       <div className="flex items-center space-x-2">
                         <h3 className="text-base font-bold text-neutral-100">
-                          Bheemaiah
+                          Dr. Bheemaiah Anil K.
                         </h3>
                         <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
-                          Principal Investigator
+                          Director, Synergy Robotics
                         </span>
                       </div>
                       <p className="text-xs text-amber-300 font-medium mt-0.5">
-                        Indian Institute of Technology Madras (IIT Madras) Alumni
+                        Director, Synergy Robotics • Indian Institute of Technology Madras (IIT Madras) Alumni
                       </p>
                       <p className="text-xs text-neutral-400 mt-0.5">
-                        St. Paul CoderDojo / Singularity-1 Open Science Initiative
+                        Principal Investigator • Singularity-1 Autonomous Scientific Publication Initiative
                       </p>
                     </div>
                   </div>
@@ -348,10 +348,10 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({ isOpen, 
 
                 <div className="pt-4 border-t border-neutral-800/80 text-xs text-neutral-300 leading-relaxed space-y-2">
                   <p>
-                    <strong>Research Vision:</strong> Bridging the frontier of autonomous agentic reasoning, human-preference reinforcement learning (RLHF), and mathematically verifiable open scientific preprints. Singularity-1 formalizes the transition from unstructured generation to peer-review calibrated scientific synthesis.
+                    <strong>Research Leadership & Vision:</strong> Pioneering autonomous agentic reasoning, multi-attribute AI alignment, mechanistic interpretability, and closed-loop Reinforcement Learning from Human Feedback (RLHF). Under the directorate of <strong>Dr. Bheemaiah Anil K.</strong> at <strong>Synergy Robotics</strong>, Singularity-1 formalizes mathematical guarantees against reward hacking, ensures verifiable KaTeX lemma derivations, and enables bitwise-reproducible scientific preprints.
                   </p>
                   <p className="text-neutral-400">
-                    <strong>Alumni Credentials:</strong> Indian Institute of Technology Madras (IITM) • Active in STEM education and open scientific software through St. Paul CoderDojo and open-source GitHub initiatives.
+                    <strong>Academic Pedigree:</strong> Indian Institute of Technology Madras (IIT Madras) Alumni • Active Director at Synergy Robotics advancing safety-critical robotic foundations, autonomous decision systems, and open scientific AI architectures.
                   </p>
                 </div>
               </div>
@@ -668,24 +668,26 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({ isOpen, 
                   </p>
                 </div>
 
-                {/* Verification CLI Commands */}
-                <div className="space-y-2">
+                {/* Verification CLI Commands: Docker & Singularity */}
+                <div className="space-y-3">
                   <span className="text-xs font-mono font-semibold text-neutral-300 flex items-center space-x-1.5">
                     <Terminal className="w-3.5 h-3.5 text-amber-400" />
-                    <span>CLI Commands: Image Verification & Execution</span>
+                    <span>CLI Commands: Docker Container Suite & HPC Singularity</span>
                   </span>
-                  <div className="rounded-lg bg-neutral-950 border border-neutral-800 p-3 text-xs font-mono text-neutral-300 space-y-2">
+                  <div className="rounded-lg bg-neutral-950 border border-neutral-800 p-3 text-xs font-mono text-neutral-300 space-y-2.5">
                     <div>
-                      <span className="text-neutral-500"># 1. Compute SHA-256 digest to verify binary integrity</span>
-                      <div className="text-amber-300">sha256sum singularity-oneproject.sif</div>
+                      <span className="text-neutral-500"># 1. Build and run via Docker</span>
+                      <div className="text-amber-300">docker build -t singularity-1 .</div>
+                      <div className="text-amber-300">docker run -d -p 3000:3000 -e GEMINI_API_KEY="key" singularity-1</div>
                     </div>
                     <div>
-                      <span className="text-neutral-500"># 2. Inspect embedded metadata, runscripts & build definitions</span>
-                      <div className="text-amber-300">singularity inspect --all singularity-oneproject.sif</div>
+                      <span className="text-neutral-500"># 2. One-command launch with Docker Compose</span>
+                      <div className="text-amber-300">docker compose up --build -d</div>
                     </div>
                     <div>
-                      <span className="text-neutral-500"># 3. Execute the Singularity-1 agent synthesis loop with GPU acceleration</span>
-                      <div className="text-amber-300">singularity run --nv singularity-oneproject.sif npm run start</div>
+                      <span className="text-neutral-500"># 3. HPC Apptainer / Singularity build & execution</span>
+                      <div className="text-amber-300">singularity build singularity-1.sif Singularity.def</div>
+                      <div className="text-amber-300">singularity run --cleanenv singularity-1.sif</div>
                     </div>
                   </div>
                 </div>
@@ -694,23 +696,23 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({ isOpen, 
                 <div className="space-y-2">
                   <span className="text-xs font-mono font-semibold text-neutral-300 flex items-center space-x-1.5">
                     <Layers className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Singularity.def (Apptainer Recipe)</span>
+                    <span>Singularity.def (HPC Apptainer Recipe)</span>
                   </span>
                   <pre className="p-3 rounded-lg bg-neutral-950 border border-neutral-800 text-[11px] font-mono text-neutral-300 overflow-x-auto leading-relaxed">
 {`Bootstrap: docker
-From: node:20-bookworm-slim
+From: node:22-slim
 
 %labels
-    Maintainer Bheemaiah (IIT Madras Alumni)
-    Project Singularity-1 Autonomous arXiv Preprint Synthesis
+    Author Dr. Bheemaiah Anil K., Director, Synergy Robotics
+    Affiliation Synergy Robotics / Indian Institute of Technology Madras Alumni
+    Project Singularity-1 Autonomous arXiv Preprint Synthesis & SOTA RLHF Platform
     Version 2.4.0
     Digest sha256:4f8e91b6c738e4a908d13a886df29c71c4c1a59b6574f85e493bb3d75c80a2df
 
 %post
-    apt-get update && apt-get install -y texlive-latex-base texlive-fonts-recommended texlive-latex-extra git curl
-    mkdir -p /app
-    cd /app
-    # Install dependencies and compile Singularity-1 bundle
+    apt-get update && apt-get install -y git curl python3 ca-certificates
+    mkdir -p /opt/singularity-1
+    cd /opt/singularity-1
     npm install && npm run build
 
 %environment
@@ -718,7 +720,7 @@ From: node:20-bookworm-slim
     export NODE_ENV=production
 
 %runscript
-    cd /app
+    cd /opt/singularity-1
     exec node dist/server.cjs`}
                   </pre>
                 </div>
@@ -816,7 +818,7 @@ From: node:20-bookworm-slim
                     BibTeX Academic Citation
                   </h3>
                   <p className="text-xs text-neutral-400">
-                    Cite Singularity-1 and Bheemaiah (IIT Madras Alumni) in academic preprints and publications.
+                    Cite Singularity-1 and Dr. Bheemaiah Anil K. (Director, Synergy Robotics • IIT Madras Alumni) in academic preprints.
                   </p>
                 </div>
                 <button
@@ -846,7 +848,7 @@ From: node:20-bookworm-slim
                   Plain Text Citation
                 </h4>
                 <p className="text-xs text-neutral-300 font-serif-academic leading-relaxed">
-                  Bheemaiah and Google Antigravity Agent Collective. (2026). "Singularity-1: An Autonomous Multi-Agent Platform for arXiv Preprint Synthesis with Human-in-the-Loop RLHF Rubric Optimization." <em>arXiv preprint arXiv:2603.04891 [cs.AI]</em>. Indian Institute of Technology Madras Alumni. Available at: {prodUrl}
+                  Dr. Bheemaiah Anil K. and Google Antigravity Agent Collective. (2026). "Singularity-1: An Autonomous Multi-Agent Platform for AI Alignment, Mechanistic Interpretability, Empirical Benchmarking and SOTA RLHF Synthesis." <em>arXiv preprint arXiv:2603.04891 [cs.AI]</em>. Synergy Robotics, Indian Institute of Technology Madras Alumni. Available at: {prodUrl}
                 </p>
               </div>
             </div>
@@ -857,7 +859,7 @@ From: node:20-bookworm-slim
         <div className="p-4 border-t border-neutral-800 bg-neutral-950 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-400">
           <div className="flex items-center space-x-2 font-mono">
             <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            <span>PI: Bheemaiah (bheemaiah@alumni.iitm.ac.in) • IIT Madras Alumni</span>
+            <span>PI: Dr. Bheemaiah Anil K. (Director, Synergy Robotics • IIT Madras Alumni)</span>
           </div>
 
           <div className="flex items-center space-x-2">

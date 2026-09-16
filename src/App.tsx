@@ -538,7 +538,7 @@ export default function App() {
           </button>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] text-neutral-500">
-          <span>PI: <strong>Bheemaiah</strong> (<a href="mailto:bheemaiah@alumni.iitm.ac.in" className="hover:text-amber-400">bheemaiah@alumni.iitm.ac.in</a>)</span>
+          <span>PI: <strong>Dr. Bheemaiah Anil K.</strong> (Director, Synergy Robotics • <a href="mailto:bheemaiah@alumni.iitm.ac.in" className="hover:text-amber-400">bheemaiah@alumni.iitm.ac.in</a>)</span>
           <span>•</span>
           <span>IIT Madras Alumni</span>
           <span>•</span>

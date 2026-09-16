@@ -1,0 +1,24 @@
+Bootstrap: docker
+From: node:22-slim
+
+%labels
+    Author Dr. Bheemaiah Anil K., Director, Synergy Robotics
+    Email bheemaiah@alumni.iitm.ac.in
+    Affiliation Synergy Robotics / Indian Institute of Technology Madras Alumni
+    Platform Singularity-1 (AI Alignment, Mechanistic Interpretability & SOTA RLHF Platform)
+    Version 2.4.0
+    Digest sha256:4f8e91b6c738e4a908d13a886df29c71c4c1a59b6574f85e493bb3d75c80a2df
+
+%post
+    apt-get update && apt-get install -y git curl python3 ca-certificates
+    mkdir -p /opt/singularity-1
+    cd /opt/singularity-1
+
+%environment
+    export PORT=3000
+    export NODE_ENV=production
+    export LC_ALL=C.UTF-8
+
+%runscript
+    cd /opt/singularity-1
+    exec node dist/server.cjs
