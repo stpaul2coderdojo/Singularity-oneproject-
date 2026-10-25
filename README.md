@@ -1,7 +1,7 @@
 <div align="center">
 
 # 🌌 SINGULARITY-1
-### Autonomous Multi-Agentic Platform for AI Alignment, Mechanistic Interpretability, Empirical Benchmarking & SOTA RLHF Synthesis
+### Scientific Platform for Peer Reviews, Paper Benchmarking & Creation of Synthetic Papers for RLHF
 
 [![Live Cloud Demo](https://img.shields.io/badge/⚡_Live_Cloud_Demo-Google_Cloud_Run-amber?style=for-the-badge&logo=googlecloud&logoColor=white)](https://ais-pre-67bjrhkutnv3a34zametcr-219346993343.asia-southeast1.run.app)
 [![Docker Support](https://img.shields.io/badge/Docker-Ready_Container-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#-docker--containerization-suite)
@@ -14,25 +14,20 @@
 
 ```
 ========================================================================================================
-   [Problem Formulation]  -->  [Solution Architect]  -->  [Publication Composer]
-          |                           |                           |
-          v                           v                           v
-   Literature Gap Iso          Pareto Optimization         KaTeX & LaTeX Typesetting
-                                                                  |
-    +-------------------------------------------------------------+
-    |
-    v
- [Human Review Rubric (SOTA RLHF)] ===> [Mechanistic Alignment Delta] ===> [Version Increment (v1..vn)]
-    |                                                                                |
-    +-------------------------> [GitHub & Container Provenance] <--------------------+
+   [1. PEER REVIEW AUDITOR]         [2. PAPER BENCHMARKING]        [3. SYNTHETIC PAPERS FOR RLHF]
+              |                                |                                 |
+              v                                v                                 v
+   NeurIPS / arXiv Rubric v2.4       Frontier Baseline Compare        Rubrics-as-Rewards (RaR)
+   Orthogonal Score Tensors          Citation Grounding Graph         Paired DPO Preference Datasets
+   Accept / Reject Calibration       Singularity Reproducibility      Version Evolution (v1 -> vn)
 ========================================================================================================
 ```
 
 <p align="center">
-  <b>A state-of-the-art autonomous scientific publication and alignment engine synthesizing mathematically rigorous, peer-reviewed arXiv preprints. Integrates closed-loop Reinforcement Learning from Human Feedback (RLHF), mechanistic interpretability tracing, empirical benchmark evaluation suites, containerized bitwise reproducibility (Docker & Singularity), and automated GitHub provenance tracking.</b>
+  <b>Singularity-1 is an enterprise-grade scientific platform designed for autonomous peer reviews, comprehensive academic paper benchmarking, and the creation of publication-quality synthetic papers for training and aligning frontier AI models via Reinforcement Learning from Human Feedback (RLHF) and Direct Preference Optimization (DPO).</b>
 </p>
 
-[🚀 Launch Cloud Application](https://ais-pre-67bjrhkutnv3a34zametcr-219346993343.asia-southeast1.run.app) • [🏛️ Authorship & Leadership](#%EF%B8%8F-authorship--leadership) • [🧭 AI Alignment](#-pillar-1-ai-alignment-theory) • [🔍 Interpretability](#-pillar-2-mechanistic-interpretability) • [📊 SOTA Benchmarks](#-pillar-3-academic-benchmarking-suite) • [🔄 SOTA RLHF Engine](#-pillar-4-sota-rlhf-human-rubric-engine) • [🐳 Docker Suite](#-docker--containerization-suite)
+[🚀 Launch Cloud Application](https://ais-pre-67bjrhkutnv3a34zametcr-219346993343.asia-southeast1.run.app) • [⚖️ Peer Reviews](#%EF%B8%8F-pillar-1-peer-reviews--rubric-auditor) • [📊 Paper Benchmarking](#-pillar-2-academic-paper-benchmarking-suite) • [🧬 Synthetic Papers for RLHF](#-pillar-3-creation-of-synthetic-papers-for-rlhf) • [🏛️ Authorship & Leadership](#%EF%B8%8F-authorship--leadership)
 
 ---
 

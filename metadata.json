@@ -1,6 +1,6 @@
 {
   "name": "Singularity-1",
-  "description": "Google Antigravity Agentic Platform for RLHF arXiv-quality publication synthesis and human rubric peer-review.",
+  "description": "Autonomous AI platform for academic peer review auditing, paper benchmarking & integrity verification, and synthetic paper creation for RLHF reward modeling.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

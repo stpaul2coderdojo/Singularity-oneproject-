@@ -103,7 +103,7 @@ export const DocumentationModal: React.FC<DocumentationModalProps> = ({ isOpen, 
                 </span>
               </div>
               <p className="text-xs text-neutral-400">
-                Google Antigravity Agentic Platform • arXiv Publication & RLHF Synthesis
+                Peer Reviews • Paper Benchmarking • Synthetic Papers for RLHF
               </p>
             </div>
           </div>

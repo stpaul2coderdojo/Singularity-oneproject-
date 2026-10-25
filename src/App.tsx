@@ -14,9 +14,13 @@ import { GitHubSyncDrawer } from './components/GitHubSyncDrawer';
 import { DocumentationModal } from './components/DocumentationModal';
 import { ResearchCopilotModal } from './components/ResearchCopilotModal';
 import { AgentPipelineTracker } from './components/AgentPipelineTracker';
+import { PeerReviewStudio } from './components/PeerReviewStudio';
+import { RLHFDatasetStudio } from './components/RLHFDatasetStudio';
+import { BenchmarkEvaluationView } from './components/BenchmarkEvaluationView';
+import { evaluatePublicationBenchmarks } from './utils/benchmarkEvaluator';
 import { INITIAL_EXEMPLAR_PUBLICATION } from './data/domains';
 import { generateAcademicPdf } from './utils/pdfGenerator';
-import { ArXivPublication, HumanReviewRubric, AgentStepTelemetry, GitHubConfig } from './types';
+import { ArXivPublication, HumanReviewRubric, AgentStepTelemetry, GitHubConfig, PublicationBenchmarkEvaluation } from './types';
 import { 
   Sparkles, 
   Layers, 
@@ -27,12 +31,21 @@ import {
   CheckCircle2, 
   ArrowRight,
   ShieldAlert,
-  Bot
+  Bot,
+  BarChart3,
+  BrainCircuit,
+  Award
 } from 'lucide-react';
 
 export default function App() {
   const [publication, setPublication] = useState<ArXivPublication>(INITIAL_EXEMPLAR_PUBLICATION);
-  const [activeView, setActiveView] = useState<'publication' | 'problem-solution' | 'domain'>('publication');
+  const [activeView, setActiveView] = useState<
+    'publication' | 'peer-review' | 'benchmarks' | 'rlhf-dataset' | 'problem-solution' | 'domain'
+  >('publication');
+  const [benchmarkEvaluation, setBenchmarkEvaluation] = useState<PublicationBenchmarkEvaluation>(
+    INITIAL_EXEMPLAR_PUBLICATION.benchmarkEvaluation || evaluatePublicationBenchmarks(INITIAL_EXEMPLAR_PUBLICATION)
+  );
+  const [isReevaluatingBenchmarks, setIsReevaluatingBenchmarks] = useState(false);
   const [showDomainSelector, setShowDomainSelector] = useState(false);
   const [showRubricModal, setShowRubricModal] = useState(false);
   const [showRLHFHistory, setShowRLHFHistory] = useState(false);
@@ -68,6 +81,41 @@ export default function App() {
   useEffect(() => {
     refreshGitHubStatus();
   }, []);
+
+  useEffect(() => {
+    setBenchmarkEvaluation(
+      publication.benchmarkEvaluation || evaluatePublicationBenchmarks(publication)
+    );
+  }, [publication]);
+
+  const handleReevaluateBenchmarks = async () => {
+    setIsReevaluatingBenchmarks(true);
+    try {
+      const res = await fetch('/api/evaluate/benchmarks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ publication })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.data) {
+          setBenchmarkEvaluation(data.data);
+          showToast('Academic benchmark evaluation updated with fresh audit logs!');
+          return;
+        }
+      }
+      // Deterministic client-side evaluation fallback
+      const fresh = evaluatePublicationBenchmarks(publication);
+      setBenchmarkEvaluation(fresh);
+      showToast('Academic benchmark evaluation updated!');
+    } catch (e) {
+      const fresh = evaluatePublicationBenchmarks(publication);
+      setBenchmarkEvaluation(fresh);
+      showToast('Benchmarks evaluated via local Singularity suite.');
+    } finally {
+      setIsReevaluatingBenchmarks(false);
+    }
+  };
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     setNotification({ type, message });
@@ -385,13 +433,13 @@ export default function App() {
             </div>
           </div>
 
-          {/* Primary View Switcher Tabs */}
-          <div className="flex items-center space-x-1.5 bg-neutral-900/90 p-1 rounded-xl border border-neutral-800 text-xs">
+          {/* Primary View Switcher Tabs - Remarketed Triad Architecture */}
+          <div className="flex flex-wrap items-center gap-1.5 bg-neutral-900/90 p-1 rounded-xl border border-neutral-800 text-xs">
             <button
               onClick={() => setActiveView('publication')}
               className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center space-x-1.5 ${
                 activeView === 'publication'
-                  ? 'bg-amber-500 text-neutral-950 shadow-sm'
+                  ? 'bg-amber-500 text-neutral-950 font-bold shadow-sm'
                   : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800'
               }`}
             >
@@ -400,27 +448,74 @@ export default function App() {
             </button>
 
             <button
-              onClick={() => setActiveView('problem-solution')}
+              onClick={() => setActiveView('peer-review')}
               className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center space-x-1.5 ${
-                activeView === 'problem-solution'
-                  ? 'bg-amber-500 text-neutral-950 shadow-sm'
+                activeView === 'peer-review'
+                  ? 'bg-amber-500 text-neutral-950 font-bold shadow-sm'
                   : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800'
               }`}
             >
+              <Scale className="w-3.5 h-3.5" />
+              <span>Peer Review Studio</span>
+              <span className="text-[10px] px-1 py-0.2 rounded bg-neutral-950/40 text-amber-200 font-mono">
+                Pillar 1
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveView('benchmarks')}
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center space-x-1.5 ${
+                activeView === 'benchmarks'
+                  ? 'bg-amber-500 text-neutral-950 font-bold shadow-sm'
+                  : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800'
+              }`}
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              <span>Paper Benchmarking</span>
+              <span className="text-[10px] px-1 py-0.2 rounded bg-neutral-950/40 text-sky-200 font-mono">
+                Pillar 2
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveView('rlhf-dataset')}
+              className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center space-x-1.5 ${
+                activeView === 'rlhf-dataset'
+                  ? 'bg-amber-500 text-neutral-950 font-bold shadow-sm'
+                  : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800'
+              }`}
+            >
+              <BrainCircuit className="w-3.5 h-3.5" />
+              <span>Synthetic Papers for RLHF</span>
+              <span className="text-[10px] px-1 py-0.2 rounded bg-neutral-950/40 text-purple-200 font-mono">
+                Pillar 3
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveView('problem-solution')}
+              className={`px-2.5 py-1.5 rounded-lg font-medium transition-colors flex items-center space-x-1.5 ${
+                activeView === 'problem-solution'
+                  ? 'bg-amber-500 text-neutral-950 font-bold shadow-sm'
+                  : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800'
+              }`}
+              title="Problem & Solution Architect"
+            >
               <FileText className="w-3.5 h-3.5" />
-              <span>Problem & Solution</span>
+              <span className="hidden xl:inline">Problem & Solution</span>
             </button>
 
             <button
               onClick={() => setActiveView('domain')}
-              className={`px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center space-x-1.5 ${
+              className={`px-2.5 py-1.5 rounded-lg font-medium transition-colors flex items-center space-x-1.5 ${
                 activeView === 'domain'
-                  ? 'bg-amber-500 text-neutral-950 shadow-sm'
+                  ? 'bg-amber-500 text-neutral-950 font-bold shadow-sm'
                   : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800'
               }`}
+              title="Domain Synthesis Studio"
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>Domain Studio</span>
+              <span className="hidden xl:inline">Domains</span>
             </button>
           </div>
         </div>
@@ -453,6 +548,30 @@ export default function App() {
             solution={publication.solution}
             onAdvanceToPublication={() => setActiveView('publication')}
             onOpenRubric={() => setShowRubricModal(true)}
+          />
+        )}
+
+        {activeView === 'peer-review' && (
+          <PeerReviewStudio
+            publication={publication}
+            onSubmitRLHFReview={handleRubricReviewSubmit}
+            isRefining={isRefining}
+          />
+        )}
+
+        {activeView === 'benchmarks' && (
+          <BenchmarkEvaluationView
+            evaluation={benchmarkEvaluation}
+            onReevaluate={handleReevaluateBenchmarks}
+            isReevaluating={isReevaluatingBenchmarks}
+          />
+        )}
+
+        {activeView === 'rlhf-dataset' && (
+          <RLHFDatasetStudio
+            publication={publication}
+            onSynthesizeNew={() => setShowDomainSelector(true)}
+            onOpenRubric={() => setActiveView('peer-review')}
           />
         )}
 

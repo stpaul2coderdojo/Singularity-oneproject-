@@ -1,6 +1,7 @@
 # 📖 Singularity-1 Technical Documentation
+### Peer Reviews • Paper Benchmarking • Synthetic Papers for RLHF
 
-Welcome to the comprehensive technical documentation for **Singularity-1**, an autonomous multi-agent platform for arXiv preprint synthesis, LaTeX/KaTeX equation typesetting, human-in-the-loop RLHF rubric optimization, and automated GitHub provenance tracking.
+Welcome to the comprehensive technical documentation for **Singularity-1**, an enterprise-grade scientific platform designed for autonomous peer reviews, comprehensive academic paper benchmarking, and the creation of synthetic papers for RLHF and DPO reward modeling.
 
 ---
 

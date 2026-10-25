@@ -49,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </div>
             <p className="text-xs text-neutral-400 font-mono hidden sm:block">
-              RLHF arXiv Standards Publication & Review Rubric Platform
+              Peer Reviews • Paper Benchmarking • Synthetic Papers for RLHF
             </p>
           </div>
         </div>
@@ -59,11 +59,12 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Status Badges */}
           <div className="hidden lg:flex items-center space-x-2 text-xs font-mono text-neutral-400 bg-neutral-900/80 px-3 py-1.5 rounded-lg border border-neutral-800">
             <Cpu className="w-3.5 h-3.5 text-sky-400" />
-            <span>Agentic Engine:</span>
-            <span className="text-emerald-400 font-medium">Ready</span>
-            <span className="text-neutral-600">|</span>
-            <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-            <span>arXiv Rubric v2.4</span>
+            <span>Core Triad:</span>
+            <span className="text-amber-400 font-medium">Peer Review</span>
+            <span className="text-neutral-600">•</span>
+            <span className="text-sky-400 font-medium">Benchmarks</span>
+            <span className="text-neutral-600">•</span>
+            <span className="text-emerald-400 font-medium">RLHF Synthesis</span>
           </div>
 
           {/* Exemplar Load Button */}
